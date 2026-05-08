@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    * { box-sizing: border-box; }
+    [x-cloak] { display: none !important; }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .perspective-1000 { perspective: 1000px; }
+    .backface-hidden { backface-visibility: hidden; }
+}
+
+@layer utilities {
+    .text-gradient {
+        background: linear-gradient(135deg, #ec4899, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+}
