@@ -44,7 +44,7 @@
                         <span class="text-sm font-medium text-gray-300">لعبة مجانية</span>
                     </label>
                     <div x-show="!isFree">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">السعر (ر.س)</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">السعر</label>
                         <input type="number" name="price" value="{{ old('price', $game->price) }}" step="0.01"
                                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>

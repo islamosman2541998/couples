@@ -6,29 +6,29 @@
         <div class="text-center mb-10">
             <div class="text-6xl mb-4">💳</div>
             <h1 class="text-3xl font-black mb-2">الاشتراك في {{ $game->name }}</h1>
-            <p class="text-gray-400">أكمل بيانات الاشتراك وارفع إيصال التحويل البنكي</p>
+            <p class="text-gray-400">أكمل بيانات الاشتراك وارفع إيصال التحويل </p>
         </div>
 
         <!-- Bank Info -->
         <div class="bg-blue-900/20 border border-blue-700/40 rounded-2xl p-6 mb-8">
-            <h3 class="font-bold text-blue-300 mb-4 flex items-center gap-2">🏦 بيانات التحويل البنكي</h3>
+            <h3 class="font-bold text-blue-300 mb-4 flex items-center gap-2">🏦 بيانات التحويل </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
+                {{-- <div>
                     <span class="text-gray-500">اسم البنك:</span>
                     <div class="text-white font-medium mt-1">{{ \App\Models\Setting::get('bank_name', 'البنك الأهلي') }}</div>
                 </div>
                 <div>
                     <span class="text-gray-500">اسم الحساب:</span>
                     <div class="text-white font-medium mt-1">{{ \App\Models\Setting::get('bank_holder', 'صاحب الحساب') }}</div>
-                </div>
+                </div> --}}
                 <div class="sm:col-span-2">
-                    <span class="text-gray-500">رقم IBAN:</span>
+                    <span class="text-gray-500">رقم التحويل فودافون كاش</span>
                     <div class="text-white font-mono font-bold mt-1 bg-gray-800 px-3 py-2 rounded-lg text-sm tracking-wider">
                         {{ \App\Models\Setting::get('bank_account', 'SA00 0000 0000 0000 0000 0000') }}
                     </div>
                 </div>
                 <div class="sm:col-span-2">
-                    <span class="text-yellow-400 font-bold">المبلغ المطلوب: {{ number_format($game->price, 2) }} ريال سعودي</span>
+                    <span class="text-yellow-400 font-bold">المبلغ المطلوب: {{ number_format($game->price, 2) }}  </span>
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
                 <select name="game_id" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
                     @foreach($paidGames as $g)
                         <option value="{{ $g->id }}" {{ $g->id == $game->id ? 'selected' : '' }}>
-                            {{ $g->name }} - {{ number_format($g->price, 0) }} ر.س
+                            {{ $g->name }} - {{ number_format($g->price, 0) }} ر
                         </option>
                     @endforeach
                 </select>

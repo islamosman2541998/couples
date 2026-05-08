@@ -92,7 +92,7 @@
                             {{ $game->type === 'spinner' ? '🎡' : '🃏' }}
                         @endif
                         <span class="absolute top-3 left-3 bg-gradient-to-l from-yellow-500 to-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                            {{ number_format($game->price, 0) }} ر.س
+                            {{ number_format($game->price, 0) }} 
                         </span>
                     </div>
                     <div class="p-5">

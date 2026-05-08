@@ -24,7 +24,7 @@
                         <span class="bg-green-500 text-white text-sm px-3 py-1 rounded-full font-bold">مجاني</span>
                     @else
                         <span class="bg-gradient-to-l from-yellow-500 to-orange-500 text-white text-sm px-3 py-1 rounded-full font-bold">
-                            {{ number_format($game->price, 0) }} ر.س
+                            {{ number_format($game->price, 0) }} 
                         </span>
                     @endif
                 </div>

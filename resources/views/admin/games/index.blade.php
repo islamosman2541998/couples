@@ -43,7 +43,7 @@
                                 @if($game->is_free)
                                     <span class="text-green-400">مجاني</span>
                                 @else
-                                    <span class="text-yellow-400">{{ number_format($game->price, 0) }} ر.س</span>
+                                    <span class="text-yellow-400">{{ number_format($game->price, 0) }} </span>
                                 @endif
                             </td>
                             <td class="p-4">

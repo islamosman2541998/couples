@@ -48,7 +48,7 @@
 
                 <div x-data="{ isFree: {{ old('is_free', '1') ? 'true' : 'false' }} }">
                     <div x-show="!isFree">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">السعر (ر.س)</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">السعر </label>
                         <input type="number" name="price" value="{{ old('price', 0) }}" step="0.01" min="0"
                                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
