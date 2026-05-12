@@ -55,7 +55,7 @@
                                     {{ $sub->status_label }}
                                 </span>
                             </td>
-                            <td class="p-4 text-xs text-gray-500">{{ $sub->created_at->format('Y/m/d') }}</td>
+                            <td class="p-4 text-xs text-gray-500">{{ optional($sub->created_at)->format('Y/m/d') ?? '-' }}</td>
                             <td class="p-4">
                                 <a href="{{ route('admin.subscriptions.show', $sub) }}" class="text-xs text-purple-400 hover:text-purple-300 px-2 py-1 bg-purple-900/20 rounded-lg">عرض</a>
                             </td>
