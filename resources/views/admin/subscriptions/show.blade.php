@@ -44,8 +44,8 @@
             <!-- Receipt Image -->
             <div>
                 <h3 class="text-sm text-gray-500 mb-3">صورة إيصال التحويل</h3>
-                <a href="{{ optional($subscription->receipt_url) }}" target="_blank" class="block">
-                    <img src="{{ optional($subscription->receipt_url) }}" alt="إيصال التحويل"
+                <a href="{{ @$subscription->receipt_url }}" target="_blank" class="block">
+                    <img src="{{ @$subscription->receipt_url }}" alt="إيصال التحويل"
                          class="max-w-full max-h-80 object-contain rounded-xl border border-gray-700 hover:border-purple-500 transition-colors">
                 </a>
             </div>
