@@ -12,7 +12,7 @@
                     <h1 class="text-2xl font-black">{{ $user->name }}</h1>
                     <p class="text-gray-400">{{ $user->email }}</p>
                     @if($user->phone)<p class="text-gray-500 text-sm mt-1">📞 {{ $user->phone }}</p>@endif
-                    <p class="text-gray-600 text-xs mt-2">عضو منذ {{ $user->created_at->format('Y/m/d') }}</p>
+                    <p class="text-gray-600 text-xs mt-2">عضو منذ {{ optional($user->created_at)->format('Y/m/d') ?? '-' }}</p>
                 </div>
                 <div class="mr-auto">
                     <a href="{{ route('profile.edit') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
@@ -46,7 +46,7 @@
                             </div>
                             <div>
                                 <div class="font-bold">{{ $sub->game->name }}</div>
-                                <div class="text-xs text-gray-500 mt-1">{{ $sub->created_at->format('Y/m/d') }}</div>
+                                <div class="text-xs text-gray-500 mt-1">{{ optional($sub->created_at)->format('Y/m/d') ?? '-' }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
