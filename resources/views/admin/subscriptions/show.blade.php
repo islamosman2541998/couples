@@ -25,18 +25,18 @@
                 </div>
                 <div>
                     <span class="text-gray-500">تاريخ الطلب:</span>
-                    <div class="text-white font-medium mt-1">{{ @$subscription->created_at->format('Y/m/d H:i') }}</div>
+                    <div class="text-white font-medium mt-1">{{ optional($subscription->created_at)->format('Y/m/d H:i') ?? '-' }}</div>
                 </div>
                 @if($subscription->approved_at)
                     <div>
                         <span class="text-gray-500">تاريخ القبول:</span>
-                        <div class="text-green-400 font-medium mt-1">{{@$subscription->approved_at->format('Y/m/d H:i') }}</div>
+                        <div class="text-green-400 font-medium mt-1">{{ optional($subscription->approved_at)->format('Y/m/d H:i') ?? '-' }}</div>
                     </div>
                 @endif
                 @if($subscription->admin_notes)
                     <div class="col-span-2">
                         <span class="text-gray-500">ملاحظات الإدارة:</span>
-                        <div class="text-white mt-1">{{ @$subscription->admin_notes }}</div>
+                        <div class="text-white mt-1">{{ optional($subscription->admin_notes) ?? '-' }}</div>
                     </div>
                 @endif
             </div>
@@ -44,8 +44,8 @@
             <!-- Receipt Image -->
             <div>
                 <h3 class="text-sm text-gray-500 mb-3">صورة إيصال التحويل</h3>
-                <a href="{{ @$subscription->receipt_url }}" target="_blank" class="block">
-                    <img src="{{ @$subscription->receipt_url }}" alt="إيصال التحويل"
+                <a href="{{ optional($subscription->receipt_url) }}" target="_blank" class="block">
+                    <img src="{{ optional($subscription->receipt_url) }}" alt="إيصال التحويل"
                          class="max-w-full max-h-80 object-contain rounded-xl border border-gray-700 hover:border-purple-500 transition-colors">
                 </a>
             </div>
