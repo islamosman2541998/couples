@@ -26,8 +26,7 @@ class GameManageController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type'        => 'required|in:card,spinner',
-            'is_free'     => 'boolean',
+'type' => 'required|in:card,spinner,scratch,who,challenge,know_me',            'is_free'     => 'boolean',
             'price'       => 'required_if:is_free,0|numeric|min:0',
             'is_active'   => 'boolean',
             'sort_order'  => 'integer',
@@ -57,7 +56,7 @@ class GameManageController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type'        => 'required|in:card,spinner',
+'type' => 'required|in:card,spinner,scratch,who,challenge,know_me',
             'is_free'     => 'boolean',
             'price'       => 'required_if:is_free,0|numeric|min:0',
             'is_active'   => 'boolean',
