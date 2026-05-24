@@ -213,7 +213,7 @@
                     ctx.font = `bold ${Math.floor(w * 0.12)}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('🪙 اشخبط هنا', w / 2, h / 2);
+                    ctx.fillText('🪙 خربش هنا', w / 2, h / 2);
                     ctx.restore();
 
                     // Coin pattern dots
