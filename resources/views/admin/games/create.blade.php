@@ -6,6 +6,7 @@
         </div>
 
         <form method="POST" action="{{ route('admin.games.store') }}" enctype="multipart/form-data"
+              x-data="{ isFree: {{ old('is_free', '1') ? 'true' : 'false' }} }"
               class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-6">
             @csrf
 
@@ -20,8 +21,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">نوع اللعبة *</label>
                     <select name="type" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="card" {{ old('type') === 'card' ? 'selected' : '' }}>🃏 لعبة كروت</option>
-                        <option value="spinner" {{ old('type') === 'spinner' ? 'selected' : '' }}>🎡 سبينر</option>
+                        <x-game-type-options :selected="old('type', 'card')" />
                     </select>
                 </div>
 
@@ -37,6 +37,15 @@
                               class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none">{{ old('description') }}</textarea>
                 </div>
 
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">طريقة اللعب</label>
+                    <p class="text-xs text-gray-500 mb-2">اكتب كل خطوة في سطر منفصل؛ ستظهر للعميل كقائمة مرتبة.</p>
+                    <textarea name="how_to_play" rows="7"
+                              class="w-full bg-gray-800 border @error('how_to_play') border-red-500 @else border-gray-700 @enderror rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y"
+                              placeholder="اختاروا المستوى المناسب&#10;ابدأوا الجولة&#10;نفّذوا المهمة الظاهرة">{{ old('how_to_play') }}</textarea>
+                    @error('how_to_play')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
                 <div>
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" name="is_free" value="1" {{ old('is_free', '1') ? 'checked' : '' }}
@@ -46,7 +55,7 @@
                     </label>
                 </div>
 
-                <div x-data="{ isFree: {{ old('is_free', '1') ? 'true' : 'false' }} }">
+                <div>
                     <div x-show="!isFree">
                         <label class="block text-sm font-medium text-gray-300 mb-2">السعر </label>
                         <input type="number" name="price" value="{{ old('price', 0) }}" step="0.01" min="0"

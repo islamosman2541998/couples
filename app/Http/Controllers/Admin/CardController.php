@@ -41,7 +41,7 @@ class CardController extends Controller
             'is_active'     => 'boolean',
             'sort_order'    => 'integer',
         ]);
-        $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['is_active'] = $request->boolean('is_active');
 
         Card::create($validated);
         return redirect()->route('admin.cards.index')->with('success', 'تم إضافة الكارت بنجاح');
@@ -62,7 +62,7 @@ class CardController extends Controller
             'is_active'     => 'boolean',
             'sort_order'    => 'integer',
         ]);
-        $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['is_active'] = $request->boolean('is_active');
 
         $card->update($validated);
         return redirect()->route('admin.cards.index')->with('success', 'تم تحديث الكارت بنجاح');

@@ -38,9 +38,9 @@ class ChallengeCardController extends Controller
             $data['image'] = $request->file('image')->store('challenges', 'public');
         }
 
-        $data['is_active']  = $request->boolean('is_active', true);
-        $data['sort_order'] = $request->input('sort_order', 0);
-        $data['timer']      = $request->input('timer', 0);
+        $data['is_active']  = $request->boolean('is_active');
+        $data['sort_order'] = ($request->input('sort_order') ?? 0);
+        $data['timer']      = ($request->input('timer') ?? 0);
 
         ChallengeCard::create($data);
 
@@ -73,9 +73,9 @@ class ChallengeCardController extends Controller
             $data['image'] = $request->file('image')->store('challenges', 'public');
         }
 
-        $data['is_active']  = $request->boolean('is_active', true);
-        $data['sort_order'] = $request->input('sort_order', 0);
-        $data['timer']      = $request->input('timer', 0);
+        $data['is_active']  = $request->boolean('is_active');
+        $data['sort_order'] = ($request->input('sort_order') ?? 0);
+        $data['timer']      = ($request->input('timer') ?? 0);
 
         $challengeCard->update($data);
 

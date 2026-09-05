@@ -12,6 +12,8 @@ class ActiveUserMiddleware
     {
         if (auth()->check() && !auth()->user()->is_active) {
             auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             return redirect()->route('login')->withErrors(['email' => 'حسابك معطّل. تواصل مع الإدارة.']);
         }
 

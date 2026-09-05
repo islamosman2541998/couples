@@ -10,6 +10,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $attributes = ['is_active' => true, 'is_admin' => false];
+
     protected $fillable = [
         'name',
         'email',

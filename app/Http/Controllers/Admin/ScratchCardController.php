@@ -26,6 +26,7 @@ class ScratchCardController extends Controller
         $data = $request->validate([
             'number'     => 'required|integer|min:1|unique:scratch_cards,number',
             'content'    => 'required|string|max:500',
+            'level'      => 'sometimes|integer|in:1,2,3',
             'image'      => 'nullable|image|max:2048',
             'sort_order' => 'nullable|integer',
             'is_active'  => 'nullable|boolean',
@@ -35,8 +36,8 @@ class ScratchCardController extends Controller
             $data['image'] = $request->file('image')->store('scratch', 'public');
         }
 
-        $data['is_active']  = $request->boolean('is_active', true);
-        $data['sort_order'] = $request->input('sort_order', 0);
+        $data['is_active']  = $request->boolean('is_active');
+        $data['sort_order'] = ($request->input('sort_order') ?? 0);
 
         ScratchCard::create($data);
 
@@ -54,6 +55,7 @@ class ScratchCardController extends Controller
         $data = $request->validate([
             'number'     => 'required|integer|min:1|unique:scratch_cards,number,' . $scratchCard->id,
             'content'    => 'required|string|max:500',
+            'level'      => 'sometimes|integer|in:1,2,3',
             'image'      => 'nullable|image|max:2048',
             'sort_order' => 'nullable|integer',
             'is_active'  => 'nullable|boolean',
@@ -66,8 +68,8 @@ class ScratchCardController extends Controller
             $data['image'] = $request->file('image')->store('scratch', 'public');
         }
 
-        $data['is_active']  = $request->boolean('is_active', true);
-        $data['sort_order'] = $request->input('sort_order', 0);
+        $data['is_active']  = $request->boolean('is_active');
+        $data['sort_order'] = ($request->input('sort_order') ?? 0);
 
         $scratchCard->update($data);
 

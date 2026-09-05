@@ -19,8 +19,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">نوع اللعبة *</label>
                     <select name="type" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="card" {{ old('type', $game->type) === 'card' ? 'selected' : '' }}>🃏 كروت</option>
-                        <option value="spinner" {{ old('type', $game->type) === 'spinner' ? 'selected' : '' }}>🎡 سبينر</option>
+                        <x-game-type-options :selected="old('type', $game->type)" />
                     </select>
                 </div>
 
@@ -34,6 +33,14 @@
                     <label class="block text-sm font-medium text-gray-300 mb-2">الوصف</label>
                     <textarea name="description" rows="3"
                               class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none">{{ old('description', $game->description) }}</textarea>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">طريقة اللعب</label>
+                    <p class="text-xs text-gray-500 mb-2">اكتب كل خطوة في سطر منفصل؛ ستظهر للعميل كقائمة مرتبة.</p>
+                    <textarea name="how_to_play" rows="7"
+                              class="w-full bg-gray-800 border @error('how_to_play') border-red-500 @else border-gray-700 @enderror rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y">{{ old('how_to_play', $game->how_to_play) }}</textarea>
+                    @error('how_to_play')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div x-data="{ isFree: {{ old('is_free', $game->is_free ? '1' : '0') ? 'true' : 'false' }} }">

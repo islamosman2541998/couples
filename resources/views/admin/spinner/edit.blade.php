@@ -4,6 +4,12 @@
         <form method="POST" action="{{ route('admin.spinner-images.update', $spinnerImage) }}" enctype="multipart/form-data"
               class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-5">
             @csrf @method('PUT')
+            @if($errors->any())
+                <div role="alert" class="bg-red-900/30 text-red-300 rounded-xl p-4 text-sm">
+                    <p>لم يتم الحفظ. راجع البيانات التالية واختر الصورة مرة أخرى:</p>
+                    @foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach
+                </div>
+            @endif
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">الاسم</label>
                 <input type="text" name="name" value="{{ old('name', $spinnerImage->name) }}"
@@ -11,9 +17,14 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">الصورة الحالية</label>
-                <img src="{{ $spinnerImage->image_url }}" alt="" class="w-20 h-20 object-cover rounded-xl mb-2">
+                @if($spinnerImage->image && $spinnerImage->image !== 'spinner/placeholder.png')
+                    <img src="{{ $spinnerImage->image_url }}" alt="{{ $spinnerImage->name }}" class="w-20 h-20 object-cover rounded-xl mb-2">
+                @else
+                    <p class="text-gray-400 text-sm mb-2">لم يتم رفع صورة لهذا العنصر بعد.</p>
+                @endif
                 <input type="file" name="image" accept="image/*"
                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm">
+                <p class="text-xs text-gray-400 mt-2">اختر صورة بحجم لا يتجاوز 2 ميجابايت، ثم اضغط حفظ.</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">اللون</label>

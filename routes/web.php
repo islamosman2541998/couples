@@ -1,30 +1,33 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\GameController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\GameManageController;
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CardLevelController;
+use App\Http\Controllers\Admin\ChallengeCardController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GameManageController;
+use App\Http\Controllers\Admin\KnowMeController;
+use App\Http\Controllers\Admin\ScratchCardController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SpinnerController;
 use App\Http\Controllers\Admin\SubscriptionManageController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\SettingController;
-use App\Http\Controllers\Admin\ScratchCardController;
 use App\Http\Controllers\Admin\WhoQuestionController;
-use App\Http\Controllers\Admin\ChallengeCardController;
-use App\Http\Controllers\Admin\KnowMeController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 // ==================== Frontend ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/games/{slug}/scratch-cards/{number}', [GameController::class, 'scratchCard'])
+    ->whereNumber('number')
+    ->name('games.scratch-card');
 Route::get('/games/{slug}', [GameController::class, 'show'])->name('games.show');
 Route::get('/games/{slug}/play', [GameController::class, 'play'])->name('games.play');
 Route::get('/subscribe/success', [SubscriptionController::class, 'success'])->name('subscribe.success');
-Route::get('/subscribe/{gameId}', [SubscriptionController::class, 'create'])->name('subscribe.create');
-Route::post('/subscribe', [SubscriptionController::class, 'store'])->name('subscribe.store');
+Route::get('/subscribe/{gameId}', [SubscriptionController::class, 'create'])->middleware('auth')->name('subscribe.create');
+Route::post('/subscribe', [SubscriptionController::class, 'store'])->middleware('auth')->name('subscribe.store');
 
 // Static pages
 Route::get('/about', [HomeController::class, 'about'])->name('about');
@@ -44,19 +47,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Games
-    Route::resource('games', GameManageController::class);
+    Route::resource('games', GameManageController::class)->except(['show']);
     Route::patch('games/{game}/toggle', [GameManageController::class, 'toggle'])->name('games.toggle');
 
     // Cards
-    Route::resource('cards', CardController::class);
+    Route::resource('cards', CardController::class)->except(['show']);
     Route::resource('card-levels', CardLevelController::class)->except(['show']);
 
     // Spinner Images
-    Route::resource('spinner-images', SpinnerController::class);
+    Route::resource('spinner-images', SpinnerController::class)->except(['show']);
     Route::patch('spinner-images/{image}/toggle', [SpinnerController::class, 'toggle'])->name('spinner.toggle');
 
     // Scratch Cards
-    Route::resource('scratch-cards', ScratchCardController::class);
+    Route::resource('scratch-cards', ScratchCardController::class)->except(['show']);
 
     // Who Questions
     Route::resource('who-questions', WhoQuestionController::class)->except(['show']);
@@ -70,6 +73,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Subscriptions
     Route::get('subscriptions', [SubscriptionManageController::class, 'index'])->name('subscriptions.index');
     Route::get('subscriptions/{subscription}', [SubscriptionManageController::class, 'show'])->name('subscriptions.show');
+    Route::get('subscriptions/{subscription}/receipt', [SubscriptionManageController::class, 'receipt'])->name('subscriptions.receipt');
     Route::patch('subscriptions/{subscription}/approve', [SubscriptionManageController::class, 'approve'])->name('subscriptions.approve');
     Route::patch('subscriptions/{subscription}/reject', [SubscriptionManageController::class, 'reject'])->name('subscriptions.reject');
 

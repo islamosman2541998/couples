@@ -18,7 +18,10 @@
                     <img src="{{ $game->image_url }}" alt="{{ $game->name }}" class="w-full h-full object-cover absolute inset-0">
                     <div class="absolute inset-0 bg-black/30"></div>
                 @endif
-                <span class="relative">{{ $game->type === 'spinner' ? '🎡' : '🃏' }}</span>
+                @php
+                    $gameIcons = ['card' => '🃏', 'spinner' => '🎡', 'scratch' => '✨', 'who' => '🤔', 'challenge' => '🎯', 'know_me' => '💍'];
+                @endphp
+                <span class="relative">{{ $gameIcons[$game->type] ?? '🎮' }}</span>
                 <div class="absolute top-4 left-4">
                     @if($game->is_free)
                         <span class="bg-green-500 text-white text-sm px-3 py-1 rounded-full font-bold">مجاني</span>
@@ -34,25 +37,29 @@
                 <h1 class="text-3xl font-black mb-4">{{ $game->name }}</h1>
                 <p class="text-gray-400 text-lg leading-relaxed mb-8">{{ $game->description }}</p>
 
-                @if($game->type === 'card')
-                    <div class="bg-gray-800/50 rounded-2xl p-6 mb-8">
-                        <h3 class="font-bold text-white mb-4 flex items-center gap-2"><span>🃏</span> كيف تلعب؟</h3>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> اختر مستوى الصعوبة (سهل / متوسط / صعب)</li>
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> يتناوب اللاعبان (راجل وست) على سحب الكروت</li>
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> اضغط على الكارت لتقلبه وتظهر التحدي</li>
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> نفّذ التحدي أو الحكم المكتوب على الكارت</li>
-                        </ul>
-                    </div>
-                @elseif($game->type === 'spinner')
-                    <div class="bg-gray-800/50 rounded-2xl p-6 mb-8">
-                        <h3 class="font-bold text-white mb-4 flex items-center gap-2"><span>🎡</span> كيف تلعب؟</h3>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> اضغط زر "لف" لتدوير العجلة</li>
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> انتظر حتى تتوقف العجلة على نتيجة عشوائية</li>
-                            <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">•</span> نفّذ ما تشير إليه العجلة</li>
-                        </ul>
-                    </div>
+                @php
+                    $playSteps = collect(preg_split('/\R/u', trim((string) $game->how_to_play)))
+                        ->map(fn ($step) => trim($step))
+                        ->filter();
+                @endphp
+                @if($playSteps->isNotEmpty())
+                    <section class="bg-gradient-to-br from-gray-800/80 to-gray-800/40 border border-gray-700 rounded-2xl p-6 mb-8" aria-labelledby="how-to-play-title">
+                        <h2 id="how-to-play-title" class="text-xl font-black text-white mb-5 flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center" aria-hidden="true">🎮</span>
+                            طريقة اللعب
+                        </h2>
+                        <ol class="space-y-4">
+                            @foreach($playSteps as $step)
+                                <li class="flex items-start gap-3 text-gray-300 leading-relaxed">
+                                    <span class="shrink-0 w-7 h-7 rounded-full bg-purple-600 text-white text-sm font-bold flex items-center justify-center mt-0.5">{{ $loop->iteration }}</span>
+                                    <span>{{ $step }}</span>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="mt-6 pt-4 border-t border-gray-700 text-sm text-gray-400 leading-relaxed">
+                            💗 أي سؤال أو مهمة ممكن تتخطّوها من غير تبرير؛ اختاروا دائمًا ما يناسبكم أنتم الاتنين.
+                        </p>
+                    </section>
                 @endif
 
                 <div class="flex gap-4">

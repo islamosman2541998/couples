@@ -1,7 +1,8 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
+    <x-game-comfort-note />
 
-    <div class="max-w-2xl mx-auto px-4 py-8" x-data="spinnerGame()" x-init="init()">
+    <div class="max-w-2xl mx-auto px-4 py-8" x-data="spinnerGame()">
 
         <!-- Header -->
         <div class="text-center mb-8">
@@ -46,8 +47,10 @@
                 <div class="text-lg text-gray-400 mb-2">نتيجة الدوران</div>
                 <div class="text-5xl font-black" :style="`color: ${result?.color}`" x-text="result?.name"></div>
                 @if (count($images) > 0)
-                    <img x-bind:src="result?.image" x-show="result?.image" alt=""
+                    <template x-if="result?.image">
+                    <img x-bind:src="result.image" alt=""
                         class="w-32 h-32 object-cover rounded-2xl mx-auto mt-4 border-4 border-white/20">
+                    </template>
                 @endif
             </div>
 
@@ -124,7 +127,7 @@
                             ctx.rotate(startAngle + arc / 2);
                             ctx.textAlign = 'right';
                             ctx.fillStyle = '#fff';
-                            ctx.font = `bold ${Math.min(14, 80 / n)}px Tajawal, sans-serif`;
+                            ctx.font = `bold ${Math.max(10, Math.min(14, 80 / n))}px Tajawal, sans-serif`;
                             ctx.shadowColor = 'rgba(0,0,0,0.5)';
                             ctx.shadowBlur = 3;
                             ctx.fillText(item.name, r - 10, 5);
@@ -161,7 +164,8 @@
                             (2 * Math.PI - (winnerIdx * arc + arc / 2));
 
                         const startAngle = this.currentAngle;
-                        const endAngle = targetAngle;
+                        const endAngle = startAngle + extraSpins +
+                            ((targetAngle - startAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
 
                         const duration = 5000;
                         const startTime = performance.now();
@@ -205,6 +209,7 @@
                             gain.gain.setValueAtTime(0.3, ctx.currentTime);
                             gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
                             osc.start();
+                            osc.onended = () => ctx.close();
                             osc.stop(ctx.currentTime + 0.5);
                         } catch (e) {}
                     }

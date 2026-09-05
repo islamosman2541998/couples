@@ -37,7 +37,11 @@ class UserProfileController extends Controller
             $validated['password'] = Hash::make($validated['password']);
         }
 
-        $user->update($validated);
+        $user->fill($validated);
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+        $user->save();
 
         return back()->with('success', 'تم تحديث بياناتك بنجاح');
     }

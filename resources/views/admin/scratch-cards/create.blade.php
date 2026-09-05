@@ -3,6 +3,7 @@
     <form method="POST" action="{{ route('admin.scratch-cards.store') }}" enctype="multipart/form-data"
           class="max-w-2xl space-y-6">
         @csrf
+        <x-scratch-level-select :value="old('level', 1)" />
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
 

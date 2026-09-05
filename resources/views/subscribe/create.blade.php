@@ -43,7 +43,7 @@
             <!-- Game Select -->
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">اللعبة المراد الاشتراك فيها</label>
-                <select name="game_id" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <select name="game_id" onchange="window.location.href = '{{ url('/subscribe') }}/' + this.value" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
                     @foreach($paidGames as $g)
                         <option value="{{ $g->id }}" {{ $g->id == $game->id ? 'selected' : '' }}>
                             {{ $g->name }} - {{ number_format($g->price, 0) }} ر

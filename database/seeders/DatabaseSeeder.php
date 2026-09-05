@@ -11,11 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             GameSeeder::class,
-            CardLevelSeeder::class,
-            CardSeeder::class,
-            SpinnerImageSeeder::class,
-            ScratchCardSeeder::class,
-            WhoQuestionSeeder::class,
+            RomanticContentSeeder::class,
             SettingSeeder::class,
         ]);
     }

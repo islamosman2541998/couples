@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Game;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SubscriptionController extends Controller
 {
     public function create(int $gameId)
     {
-        $game = Game::findOrFail($gameId);
+        $game = Game::active()->findOrFail($gameId);
 
         if ($game->is_free) {
             return redirect()->route('games.play', $game->slug)->with('info', 'هذه اللعبة مجانية!');
@@ -23,7 +24,7 @@ class SubscriptionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'game_id'       => 'required|exists:games,id',
+            'game_id'       => ['required', Rule::exists('games', 'id')->where('is_active', 1)->where('is_free', 0)],
             'full_name'     => 'required|string|max:255',
             'phone'         => 'required|string|max:20',
             'email'         => 'required|email|max:255',
@@ -38,7 +39,7 @@ class SubscriptionController extends Controller
             'receipt_image.max'      => 'حجم الصورة يجب ألا يتجاوز 5 ميجابايت',
         ]);
 
-        $validated['receipt_image'] = $request->file('receipt_image')->store('receipts', 'public');
+        $validated['receipt_image'] = $request->file('receipt_image')->store('receipts', 'local');
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
 

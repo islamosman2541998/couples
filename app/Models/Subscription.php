@@ -34,7 +34,7 @@ class Subscription extends Model
 
     public function getReceiptUrlAttribute(): string
     {
-        return asset('storage/' . $this->receipt_image);
+        return route('admin.subscriptions.receipt', $this);
     }
 
     public function getStatusLabelAttribute(): string

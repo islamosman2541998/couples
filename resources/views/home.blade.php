@@ -60,7 +60,7 @@
                             </a>
                             <a href="{{ route('games.show', $game->slug) }}"
                                class="px-4 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white py-2.5 rounded-xl text-sm transition-colors">
-                                تفاصيل
+                                طريقة اللعب
                             </a>
                         </div>
                     </div>
@@ -119,7 +119,7 @@
                             @endauth
                             <a href="{{ route('games.show', $game->slug) }}"
                                class="px-4 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white py-2.5 rounded-xl text-sm transition-colors">
-                                تفاصيل
+                                طريقة اللعب
                             </a>
                         </div>
                     </div>

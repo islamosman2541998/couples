@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SubscriptionManageController extends Controller
 {
@@ -35,6 +36,12 @@ class SubscriptionManageController extends Controller
     {
         $subscription->load(['user', 'game']);
         return view('admin.subscriptions.show', compact('subscription'));
+    }
+
+    public function receipt(Subscription $subscription)
+    {
+        abort_unless(Storage::disk('local')->exists($subscription->receipt_image), 404);
+        return Storage::disk('local')->response($subscription->receipt_image, null, ['Cache-Control' => 'private, no-store']);
     }
 
     public function approve(Request $request, Subscription $subscription)

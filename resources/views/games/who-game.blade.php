@@ -1,7 +1,8 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
+    <x-game-comfort-note />
 
-    <div class="min-h-screen flex flex-col" x-data="whoGame()" x-init="init()">
+    <div class="min-h-screen flex flex-col" x-data="whoGame()">
 
         <!-- ===== شاشة البداية ===== -->
         <div x-show="screen === 'intro'" class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -54,6 +55,7 @@
             </div>
 
             <!-- Question Card -->
+            <button @click="nextQuestion()" class="mb-4 text-sm text-gray-400 hover:text-white">تخطي السؤال</button>
             <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 mb-6 min-h-36 flex flex-col items-center justify-center text-center">
                 <div class="text-3xl mb-3" x-text="currentQuestion?.category_emoji"></div>
                 <p class="text-xl font-black text-white leading-relaxed" x-text="currentQuestion?.question"></p>
@@ -262,8 +264,10 @@
                 },
 
                 reveal() {
+                    if (this.revealed || this.step !== 3) return;
                     this.revealed = true;
-                    this.isMatch = this.maleChoice === this.femaleChoice;
+                    // Each player's "me" refers to a different person.
+                    this.isMatch = this.maleChoice !== this.femaleChoice;
                     if (this.isMatch) {
                         this.score++;
                     } else {

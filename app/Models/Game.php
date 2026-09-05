@@ -10,7 +10,7 @@ class Game extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'description', 'image',
+        'name', 'slug', 'description', 'how_to_play', 'image',
         'type', 'is_free', 'price', 'is_active', 'sort_order',
     ];
 
@@ -31,8 +31,9 @@ class Game extends Model
     public function getImageUrlAttribute(): string
     {
         if ($this->image) {
-            return asset('storage/' . $this->image);
+            return asset('storage/'.$this->image);
         }
+
         return asset('images/game-placeholder.jpg');
     }
 

@@ -1,7 +1,8 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
+    <x-game-comfort-note />
 
-    <div class="min-h-screen flex flex-col" x-data="challengeGame()" x-init="init()">
+    <div class="min-h-screen flex flex-col" x-data="challengeGame()">
 
         <!-- ===== شاشة البداية ===== -->
         <div x-show="screen === 'intro'" class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -47,13 +48,13 @@
 
             <!-- Header -->
             <div class="flex items-center justify-between mb-5">
-                <button @click="screen = 'intro'"
+                <button @click="resetGame(); screen = 'intro'"
                         class="text-gray-500 hover:text-white text-sm flex items-center gap-1">
                     ← رجوع
                 </button>
                 <div class="text-center">
                     <span class="text-xs text-gray-500">
-                        <span x-text="currentIndex + 1"></span> / <span x-text="deck.length"></span>
+                        <span x-text="currentIndex + 1"></span> / <span x-text="totalCards"></span>
                     </span>
                 </div>
                 <div class="text-sm text-gray-400">
@@ -64,7 +65,7 @@
             <!-- Progress bar -->
             <div class="w-full bg-gray-800 rounded-full h-1.5 mb-6">
                 <div class="bg-gradient-to-l from-pink-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
-                     :style="`width: ${((currentIndex) / deck.length) * 100}%`"></div>
+                     :style="`width: ${totalCards ? (currentIndex / totalCards) * 100 : 0}%`"></div>
             </div>
 
             <!-- Card -->
@@ -145,12 +146,10 @@
                 <!-- Actions -->
                 <div x-show="showCard" x-cloak class="flex gap-3">
                     <button @click="nextCard()"
-                            :disabled="deck.length === 0"
                             class="flex-1 bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:opacity-50 text-white py-4 rounded-2xl font-bold text-lg transition-all">
-                        <span x-text="deck.length > 0 ? 'التحدي التالي ➡️' : '🎉 انتهت التحديات!'"></span>
+                        <span x-text="deck.length > 0 ? 'التحدي التالي ➡️' : 'إنهاء وعرض النتيجة 🏆'"></span>
                     </button>
                     <button @click="skipCard()"
-                            x-show="deck.length > 0"
                             class="px-4 py-4 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-2xl text-sm transition-all">
                         تخطي
                     </button>
@@ -190,6 +189,7 @@
                 deck: [],
                 currentCard: null,
                 currentIndex: 0,
+                totalCards: 0,
                 showCard: false,
                 done: 0,
                 timerRunning: false,
@@ -208,7 +208,9 @@
                 },
 
                 startGame() {
+                    this.resetGame();
                     this.deck         = this.shuffle([...this.filtered]);
+                    this.totalCards   = this.deck.length;
                     this.currentIndex = 0;
                     this.done         = 0;
                     this.showCard     = false;
@@ -226,6 +228,7 @@
                 },
 
                 startTimer() {
+                    if (this.timerRunning || this.timerLeft <= 0 || !this.showCard) return;
                     this.timerRunning = true;
                     this.timerInterval = setInterval(() => {
                         this.timerLeft--;
@@ -238,12 +241,14 @@
                 },
 
                 nextCard() {
+                    if (!this.showCard || this.screen !== 'game') return;
                     clearInterval(this.timerInterval);
                     this.done++;
                     this.advance();
                 },
 
                 skipCard() {
+                    if (!this.showCard || this.screen !== 'game') return;
                     clearInterval(this.timerInterval);
                     this.advance();
                 },
@@ -257,10 +262,8 @@
                     this.showCard    = false;
                     this.timerRunning = false;
                     this.timerDone   = false;
-                    setTimeout(() => {
-                        this.currentCard = this.deck.shift() || null;
-                        this.timerLeft   = this.currentCard?.timer || 0;
-                    }, 150);
+                    this.currentCard = this.deck.shift() || null;
+                    this.timerLeft   = this.currentCard?.timer || 0;
                 },
 
                 resetGame() {

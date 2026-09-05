@@ -1,32 +1,33 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
+    <x-game-comfort-note />
 
-    <div class="min-h-screen" x-data="cardGame()" x-init="init()">
+    <div class="min-h-screen" x-data="cardGame()">
 
         <!-- Level Selection Screen -->
         <div x-show="screen === 'levels'" class="max-w-2xl mx-auto px-4 py-12">
             <div class="text-center mb-10">
                 <div class="text-6xl mb-4">🃏</div>
                 <h1 class="text-3xl font-black mb-2">{{ $game->name }}</h1>
-                <p class="text-gray-400">اختر مستوى الصعوبة للبدء</p>
+                <p class="text-gray-400">اختاروا جوّكم الليلة وابدأوا</p>
             </div>
 
             <div class="grid gap-4">
                 @foreach($levels as $level)
-                    <button @click="selectLevel('{{ $level->slug }}', '{{ $level->name }}', '{{ $level->color }}')"
+                    <button @click="selectLevel(@js($level->slug), @js($level->name), @js($level->color))" :disabled="loading || {{ $level->cards_count }} === 0"
                             class="group relative bg-gray-900 border border-gray-800 hover:border-purple-500/50 rounded-2xl p-6 text-right transition-all transform hover:scale-105 hover:-translate-y-1">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black text-white"
                                  style="background-color: {{ $level->color }}20; border: 2px solid {{ $level->color }}40">
-                                {{ match($level->slug) { 'easy' => '😊', 'medium' => '🔥', 'hard' => '💀', default => '🃏' } }}
+                                {{ match($level->slug) { 'easy' => '✨', 'medium' => '💕', 'hard' => '🔥', default => '🃏' } }}
                             </div>
                             <div class="flex-1">
                                 <h3 class="text-xl font-black" style="color: {{ $level->color }}">{{ $level->name }}</h3>
                                 <p class="text-gray-500 text-sm mt-1">
                                     {{ $level->cards_count }} كارت متاح
-                                    @if($level->slug === 'easy') · تحديات خفيفة وممتعة
-                                    @elseif($level->slug === 'medium') · تحديات متوسطة مثيرة
-                                    @else · تحديات جريئة وصعبة
+                                    @if($level->slug === 'easy') · غزل وذكريات وبداية لطيفة
+                                    @elseif($level->slug === 'medium') · مفاجآت ولحظات تقارب
+                                    @else · اعترافات رومانسية وجرأة في التعبير
                                     @endif
                                 </p>
                             </div>
@@ -41,7 +42,7 @@
             <div class="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-5">
                 <h3 class="font-bold mb-3 text-sm text-gray-400">طريقة اللعب</h3>
                 <ul class="space-y-2 text-sm text-gray-500">
-                    <li>• اختر مستوى الصعوبة</li>
+                    <li>• اختاروا مستوى يناسب مزاجكم</li>
                     <li>• يتناوب اللاعبان على سحب الكروت</li>
                     <li>• اضغط على الكارت لتقلبه</li>
                     <li>• نفّذ التحدي المكتوب عليه</li>
@@ -132,6 +133,7 @@
             </div>
 
             <!-- Actions -->
+            <button @click="skipCard()" class="block mx-auto mb-4 text-sm text-gray-400 hover:text-white">تخطي الكارت</button>
             <div x-show="!isFlipped" class="text-center text-gray-500 text-sm mb-4">
                 اضغط على الكارت لتقلبه
             </div>
@@ -181,18 +183,21 @@
                 init() {},
 
                 async selectLevel(slug, name, color) {
+                    if (this.loading) return;
                     this.levelSlug  = slug;
                     this.levelName  = name;
                     this.levelColor = color;
                     this.loading    = true;
 
                     try {
-                        const res = await fetch(`/api/cards/${slug}?target=all`);
+                        const res = await fetch(`{{ url('/api/cards') }}/${encodeURIComponent(slug)}?target=all&game_id={{ $game->id }}`, { headers: { Accept: 'application/json' } });
+                        if (!res.ok) throw new Error('Unable to load cards');
                         const data = await res.json();
                         this.cards      = this.shuffle(data);
                         this.totalCards = this.cards.length;
                         this.cardIndex  = 0;
                         this.currentCard = this.cards.shift() || null;
+                        this.currentPlayer = this.currentCard?.target === 'female' ? 'female' : 'male';
                         this.isFlipped   = false;
                         this.screen      = 'game';
                     } catch(e) {
@@ -208,17 +213,17 @@
                 },
 
                 nextCard() {
-                    if (this.cards.length === 0) return;
+                    if (this.cards.length === 0 || !this.isFlipped) return;
 
                     // Switch player
                     this.currentPlayer = this.currentPlayer === 'male' ? 'female' : 'male';
                     this.cardIndex++;
                     this.isFlipped   = false;
 
-                    // Small delay for animation
-                    setTimeout(() => {
-                        this.currentCard = this.cards.shift() || null;
-                    }, 100);
+                    this.currentCard = this.cards.shift() || null;
+                    if (['male', 'female'].includes(this.currentCard?.target)) {
+                        this.currentPlayer = this.currentCard.target;
+                    }
                 },
 
                 resetGame() {
@@ -228,6 +233,16 @@
                     this.totalCards  = 0;
                     this.isFlipped   = false;
                     this.currentPlayer = 'male';
+                },
+
+                skipCard() {
+                    if (!this.cards.length) {
+                        this.resetGame();
+                        this.screen = 'levels';
+                        return;
+                    }
+                    this.isFlipped = true;
+                    this.nextCard();
                 },
 
                 shuffle(arr) {

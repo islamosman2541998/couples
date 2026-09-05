@@ -44,29 +44,36 @@
         <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
             @php
                 $navItems = [
-                    ['route' => 'admin.dashboard',           'label' => 'لوحة التحكم',    'icon' => '📊'],
-                    ['route' => 'admin.games.index',         'label' => 'الألعاب',         'icon' => '🎮'],
-                    ['route' => 'admin.cards.index',         'label' => 'كروت الأحكام',   'icon' => '🃏'],
-                    ['route' => 'admin.card-levels.index',   'label' => 'مستويات الكروت', 'icon' => '📈'],
-                    ['route' => 'admin.spinner-images.index','label' => 'صور السبينر',    'icon' => '🎡'],
-                    ['route' => 'admin.scratch-cards.index',  'label' => 'كروت السكراتش',      'icon' => '🪙'],
-                    ['route' => 'admin.who-questions.index',   'label' => 'أنا أو شريكي؟',   'icon' => '🤔'],
-                    ['route' => 'admin.challenge-cards.index','label' => 'كروت التحديات',    'icon' => '🎯'],
-                    ['route' => 'admin.know-me.index',        'label' => 'اعرفني 💍',         'icon' => '💍'],
+                    ['route' => 'admin.dashboard',            'label' => 'لوحة التحكم',     'icon' => '📊'],
+                    ['route' => 'admin.games.index',          'label' => 'بيانات الألعاب',  'description' => 'الاسم والصورة والوصف وطريقة اللعب', 'icon' => '🎮'],
+                    ['route' => 'admin.cards.index',          'label' => 'لعبة الكروت',      'description' => 'الكروت والأحكام', 'icon' => '🃏'],
+                    ['route' => 'admin.card-levels.index',    'label' => 'لعبة الكروت',      'description' => 'المستويات', 'icon' => '📈'],
+                    ['route' => 'admin.spinner-images.index', 'label' => 'لعبة السبينر',     'description' => 'صور ونتائج العجلة', 'icon' => '🎡'],
+                    ['route' => 'admin.scratch-cards.index',  'label' => 'خربش والعب',       'description' => 'المهام ومستويات النقاط', 'icon' => '🪙'],
+                    ['route' => 'admin.who-questions.index',  'label' => 'بوس أو دوس',       'description' => 'أسئلة أنا أو شريكي', 'icon' => '🤔'],
+                    ['route' => 'admin.challenge-cards.index','label' => 'شوق أو دوق',       'description' => 'كروت التحديات', 'icon' => '🎯'],
+                    ['route' => 'admin.know-me.index',        'label' => 'لعبة المخطوبين',   'description' => 'أسئلة عارف شريكك؟', 'icon' => '💍'],
                     ['route' => 'admin.subscriptions.index',  'label' => 'الاشتراكات',       'icon' => '💳'],
-                    ['route' => 'admin.users.index',         'label' => 'المستخدمين',     'icon' => '👥'],
-                    ['route' => 'admin.settings.index',      'label' => 'الإعدادات',      'icon' => '⚙️'],
+                    ['route' => 'admin.users.index',          'label' => 'المستخدمين',       'icon' => '👥'],
+                    ['route' => 'admin.settings.index',       'label' => 'الإعدادات',        'icon' => '⚙️'],
                 ];
             @endphp
 
             @foreach($navItems as $item)
                 <a href="{{ route($item['route']) }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                   class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all
                           {{ request()->routeIs(str_replace('.index', '.*', $item['route']))
                              ? 'bg-purple-700 text-white font-medium'
                              : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
-                    <span>{{ $item['icon'] }}</span>
-                    {{ $item['label'] }}
+                    <span class="shrink-0 text-base" aria-hidden="true">{{ $item['icon'] }}</span>
+                    <span class="min-w-0 leading-tight">
+                        <span class="block font-medium">{{ $item['label'] }}</span>
+                        @isset($item['description'])
+                            <span class="block mt-1 text-[11px] {{ request()->routeIs(str_replace('.index', '.*', $item['route'])) ? 'text-white/70' : 'text-gray-500' }}">
+                                {{ $item['description'] }}
+                            </span>
+                        @endisset
+                    </span>
                 </a>
             @endforeach
         </nav>

@@ -1,7 +1,8 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
+    <x-game-comfort-note />
 
-    <div class="min-h-screen flex flex-col" x-data="knowMeGame()" x-init="init()">
+    <div class="min-h-screen flex flex-col" x-data="knowMeGame()">
 
         <!-- ===== شاشة البداية ===== -->
         <div x-show="screen === 'intro'" class="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
@@ -78,6 +79,7 @@
 
         <!-- ===== شاشة اللعبة ===== -->
         <div x-show="screen === 'game'" x-cloak class="flex-1 flex flex-col max-w-lg mx-auto w-full px-4 py-6">
+            <button @click="nextQuestion()" class="mb-4 text-sm text-gray-400 hover:text-white">تخطي السؤال</button>
 
             <!-- Header -->
             <div class="flex items-center justify-between mb-4">
@@ -339,6 +341,7 @@
                 },
 
                 showReveal() {
+                    if (this.step !== 2 || !this.subjectAnswer.trim() || !this.guessAnswer.trim()) return;
                     this.isCorrect = this.subjectAnswer.trim().toLowerCase() === this.guessAnswer.trim().toLowerCase();
                     if (this.isCorrect) this.score.correct++;
                     else this.score.wrong++;
