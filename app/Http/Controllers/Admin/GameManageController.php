@@ -22,6 +22,18 @@ class GameManageController extends Controller
         return view('admin.games.create');
     }
 
+    public function installNew(\App\Support\InstallNewGames $installer)
+    {
+        try {
+            $installer->run();
+        } catch (\Throwable $exception) {
+            report($exception);
+            return redirect()->route('admin.games.index')->with('error', 'لم يكتمل التثبيت. تأكد من رفع ملفات التحديث وصلاحيات قاعدة البيانات، ثم حاول مجدداً. التفاصيل في storage/logs/laravel.log.');
+        }
+
+        return redirect()->route('admin.games.index')->with('success', 'تم تجهيز لعبة السيطرة والسلم والتعبان ومحتواهما. أُضيف الناقص مع الحفاظ على أسعار وحالة وتعديلات الألعاب الموجودة.');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

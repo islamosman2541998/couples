@@ -49,6 +49,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Games
+    Route::post('games/install-new', [GameManageController::class, 'installNew'])->name('games.install-new');
     Route::resource('games', GameManageController::class)->except(['show']);
     Route::patch('games/{game}/toggle', [GameManageController::class, 'toggle'])->name('games.toggle');
 

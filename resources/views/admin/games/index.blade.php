@@ -1,5 +1,19 @@
 <x-admin-layout title="إدارة الألعاب">
 
+    <div class="mb-6 rounded-2xl border border-purple-500/30 bg-purple-900/20 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="font-bold mb-1">الألعاب الجديدة مش ظاهرة بعد رفع التحديث؟</h2>
+            <p class="text-sm text-gray-400">جهّز لعبة السيطرة والسلم والتعبان ومحتواهما بضغطة واحدة. يضيف الناقص ويحافظ على الألعاب وتعديلاتك الحالية.</p>
+        </div>
+        <form method="POST" action="{{ route('admin.games.install-new') }}" x-data="{ installing: false }" @submit="installing = true" class="shrink-0">
+            @csrf
+            <button type="submit" :disabled="installing" class="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white px-5 py-3 rounded-xl text-sm font-bold transition-colors">
+                <span x-show="!installing">تثبيت الألعاب الجديدة ↻</span>
+                <span x-show="installing" x-cloak>جارٍ تجهيز الألعاب…</span>
+            </button>
+        </form>
+    </div>
+
     <div class="flex items-center justify-between mb-6">
         <p class="text-gray-400 text-sm">{{ $games->count() }} لعبة مسجلة</p>
         <a href="{{ route('admin.games.create') }}" class="bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
