@@ -106,6 +106,7 @@
         </div>
     </footer>
 
+    <x-floating-whatsapp />
     @stack('scripts')
 </body>
 </html>

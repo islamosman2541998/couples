@@ -109,5 +109,6 @@
             </div>
         </div>
     </footer>
+    <x-floating-whatsapp />
 </body>
 </html>

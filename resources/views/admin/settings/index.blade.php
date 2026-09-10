@@ -64,7 +64,7 @@
                 @foreach([
                     ['name' => 'contact_phone',    'label' => 'رقم الهاتف',      'dir' => 'ltr'],
                     ['name' => 'contact_email',    'label' => 'البريد الإلكتروني', 'dir' => 'ltr'],
-                    ['name' => 'contact_whatsapp', 'label' => 'رقم الواتساب',    'dir' => 'ltr'],
+                    ['name' => 'contact_whatsapp', 'label' => 'رقم الواتساب بكود الدولة (مثال: 201012345678) — للزر العائم', 'dir' => 'ltr'],
                     ['name' => 'bank_name',        'label' => 'اسم البنك',        'dir' => 'rtl'],
                     ['name' => 'bank_holder',      'label' => 'اسم صاحب الحساب', 'dir' => 'rtl'],
                     ['name' => 'bank_account',     'label' => 'رقم IBAN',         'dir' => 'ltr'],
