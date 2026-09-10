@@ -42,7 +42,7 @@
                     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center text-2xl">
-                                {{ $sub->game->type === 'spinner' ? '🎡' : '🃏' }}
+                                {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$sub->game->type] ?? '🃏' }}
                             </div>
                             <div>
                                 <div class="font-bold">{{ $sub->game->name }}</div>

@@ -15,7 +15,7 @@ class GameAuditTest extends TestCase
 
     public static function types(): array
     {
-        return array_map(fn ($type) => [$type], ['card', 'spinner', 'scratch', 'who', 'challenge', 'know_me']);
+        return array_map(fn ($type) => [$type], ['card', 'spinner', 'scratch', 'who', 'challenge', 'know_me', 'control', 'snakes']);
     }
 
     private function game(string $type = 'card', array $attributes = []): Game

@@ -19,7 +19,7 @@
                     <div class="absolute inset-0 bg-black/30"></div>
                 @endif
                 @php
-                    $gameIcons = ['card' => '🃏', 'spinner' => '🎡', 'scratch' => '✨', 'who' => '🤔', 'challenge' => '🎯', 'know_me' => '💍'];
+                    $gameIcons = ['card' => '🃏', 'spinner' => '🎡', 'scratch' => '✨', 'who' => '🤔', 'challenge' => '🎯', 'know_me' => '💍', 'control' => '👑', 'snakes' => '🐍'];
                 @endphp
                 <span class="relative">{{ $gameIcons[$game->type] ?? '🎮' }}</span>
                 <div class="absolute top-4 left-4">

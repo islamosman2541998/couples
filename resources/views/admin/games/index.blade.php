@@ -26,7 +26,7 @@
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                                        {{ $game->type === 'spinner' ? '🎡' : '🃏' }}
+                                        {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$game->type] ?? '🃏' }}
                                     </div>
                                     <div>
                                         <div class="font-medium text-sm">{{ $game->name }}</div>
@@ -36,7 +36,7 @@
                             </td>
                             <td class="p-4">
                                 <span class="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded-lg">
-                                    {{ $game->type === 'spinner' ? 'سبينر' : 'كروت' }}
+                                    {{ ['snakes' => 'السلم والتعبان', 'control' => 'السيطرة', 'spinner' => 'سبينر'][$game->type] ?? 'كروت' }}
                                 </span>
                             </td>
                             <td class="p-4 text-sm">

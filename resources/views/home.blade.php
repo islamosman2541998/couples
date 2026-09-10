@@ -1,6 +1,10 @@
 <x-app-layout>
     <x-slot name="title">{{ \App\Models\Setting::get('site_name', 'Funny Couples ') }} - الصفحة الرئيسية</x-slot>
 
+    @include('home.slider')
+    @include('home.promotion')
+
+    @if(!$homeSettings['slider_enabled'] || !count($slides))
     <!-- Hero Section -->
     <section class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-gray-950 to-pink-900/30"></div>
@@ -30,9 +34,11 @@
         </div>
     </section>
 
+    @endif
     <!-- Free Games -->
+    <div id="games" class="scroll-mt-20"></div>
     @if($freeGames->isNotEmpty())
-    <section id="games" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="flex items-center gap-3 mb-8">
             <div class="w-1.5 h-8 bg-gradient-to-b from-green-400 to-green-600 rounded-full"></div>
             <h2 class="text-2xl font-black">الألعاب المجانية</h2>
@@ -46,7 +52,7 @@
                         @if($game->image)
                             <img src="{{ $game->image_url }}" alt="{{ $game->name }}" class="w-full h-full object-cover absolute inset-0">
                         @else
-                            {{ $game->type === 'spinner' ? '🎡' : '🃏' }}
+                            {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$game->type] ?? '🃏' }}
                         @endif
                         <span class="absolute top-3 left-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">مجاني</span>
                     </div>
@@ -72,7 +78,7 @@
 
     <!-- Paid Games -->
     @if($paidGames->isNotEmpty())
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
+    <section id="premium-games" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
         <div class="flex items-center gap-3 mb-8">
             <div class="w-1.5 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
             <h2 class="text-2xl font-black">الألعاب المميزة</h2>
@@ -89,7 +95,7 @@
                         @if($game->image)
                             <img src="{{ $game->image_url }}" alt="{{ $game->name }}" class="w-full h-full object-cover absolute inset-0">
                         @else
-                            {{ $game->type === 'spinner' ? '🎡' : '🃏' }}
+                            {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$game->type] ?? '🃏' }}
                         @endif
                         <span class="absolute top-3 left-3 bg-gradient-to-l from-yellow-500 to-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                             {{ number_format($game->price, 0) }} 
@@ -128,6 +134,8 @@
         </div>
     </section>
     @endif
+
+    @include('home.reviews')
 
     <!-- How it works -->
     <section class="bg-gray-900/50 border-y border-gray-800 py-16">

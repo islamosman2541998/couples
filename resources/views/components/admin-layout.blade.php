@@ -52,9 +52,12 @@
                     ['route' => 'admin.scratch-cards.index',  'label' => 'خربش والعب',       'description' => 'المهام ومستويات النقاط', 'icon' => '🪙'],
                     ['route' => 'admin.who-questions.index',  'label' => 'بوس أو دوس',       'description' => 'أسئلة أنا أو شريكي', 'icon' => '🤔'],
                     ['route' => 'admin.challenge-cards.index','label' => 'شوق أو دوق',       'description' => 'كروت التحديات', 'icon' => '🎯'],
+                    ['route' => 'admin.control-cards.index',  'label' => 'لعبة السيطرة',     'description' => 'كروت السيطرة والتحديات', 'icon' => '👑'],
+                    ['route' => 'admin.snake-cells.index',    'label' => 'السلم والتعبان',   'description' => 'تحديات اللوحة الـ١٠٠', 'icon' => '🐍'],
                     ['route' => 'admin.know-me.index',        'label' => 'لعبة المخطوبين',   'description' => 'أسئلة عارف شريكك؟', 'icon' => '💍'],
                     ['route' => 'admin.subscriptions.index',  'label' => 'الاشتراكات',       'icon' => '💳'],
                     ['route' => 'admin.users.index',          'label' => 'المستخدمين',       'icon' => '👥'],
+                    ['route' => 'admin.home-content.index', 'label' => 'محتوى الرئيسية', 'icon' => '✨'],
                     ['route' => 'admin.settings.index',       'label' => 'الإعدادات',        'icon' => '⚙️'],
                 ];
             @endphp

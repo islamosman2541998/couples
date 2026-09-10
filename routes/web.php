@@ -3,10 +3,12 @@
 use App\Http\Controllers\Admin\CardController;
 use App\Http\Controllers\Admin\CardLevelController;
 use App\Http\Controllers\Admin\ChallengeCardController;
+use App\Http\Controllers\Admin\ControlCardController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GameManageController;
 use App\Http\Controllers\Admin\KnowMeController;
 use App\Http\Controllers\Admin\ScratchCardController;
+use App\Http\Controllers\Admin\SnakeCellController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SpinnerController;
 use App\Http\Controllers\Admin\SubscriptionManageController;
@@ -66,6 +68,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Challenge Cards
     Route::resource('challenge-cards', ChallengeCardController::class)->except(['show']);
+    Route::resource('control-cards', ControlCardController::class)->except(['show']);
+    Route::resource('snake-cells', SnakeCellController::class)->only(['index', 'edit', 'update']);
 
     // Know Me Questions
     Route::resource('know-me', KnowMeController::class)->except(['show']);
@@ -82,6 +86,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('users/{user}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
 
     // Settings
+    Route::get('home-content', [\App\Http\Controllers\Admin\HomeContentController::class, 'index'])->name('home-content.index');
+    Route::post('home-content/settings', [\App\Http\Controllers\Admin\HomeContentController::class, 'settings'])->name('home-content.settings');
+    Route::post('home-content/{type}/{id?}', [\App\Http\Controllers\Admin\HomeContentController::class, 'saveItem'])->whereIn('type', ['slides', 'reviews'])->name('home-content.save');
+    Route::delete('home-content/{type}/{id}', [\App\Http\Controllers\Admin\HomeContentController::class, 'destroy'])->whereIn('type', ['slides', 'reviews'])->name('home-content.destroy');
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('settings/logo', [SettingController::class, 'uploadLogo'])->name('settings.logo');

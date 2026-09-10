@@ -11,7 +11,12 @@ class HomeController extends Controller
     {
         $freeGames  = Game::active()->where('is_free', true)->orderBy('sort_order')->get();
         $paidGames  = Game::active()->where('is_free', false)->orderBy('sort_order')->get();
-        return view('home', compact('freeGames', 'paidGames'));
+        $homeSettings = \App\Support\HomeContent::settings();
+        $slides = \App\Support\HomeContent::visible('slides');
+        $reviews = \App\Support\HomeContent::visible('reviews');
+        $notificationGames = $freeGames->concat($paidGames)->when($homeSettings['game_ids'], fn ($games) => $games->whereIn('id', $homeSettings['game_ids']))
+            ->map(fn ($game) => ['name' => $game->name, 'url' => route('games.show', $game->slug), 'image' => $game->image ? $game->image_url : null])->values();
+        return view('home', compact('freeGames', 'paidGames', 'homeSettings', 'slides', 'reviews', 'notificationGames'));
     }
 
     public function about()

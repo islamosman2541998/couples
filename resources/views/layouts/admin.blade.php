@@ -50,7 +50,8 @@
                         ['route' => 'admin.spinner-images.index','label' => 'صور السبينر',    'icon' => '🎡'],
                         ['route' => 'admin.subscriptions.index','label' => 'الاشتراكات',      'icon' => '💳'],
                         ['route' => 'admin.users.index',        'label' => 'المستخدمين',      'icon' => '👥'],
-                        ['route' => 'admin.settings.index',     'label' => 'الإعدادات',       'icon' => '⚙️'],
+                        ['route' => 'admin.home-content.index', 'label' => 'محتوى الرئيسية', 'icon' => '✨'],
+                    ['route' => 'admin.settings.index',     'label' => 'الإعدادات',       'icon' => '⚙️'],
                     ];
                 @endphp
 

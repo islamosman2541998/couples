@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\CardLevel;
 use App\Models\ChallengeCard;
+use App\Models\ControlCard;
 use App\Models\Game;
 use App\Models\KnowMeQuestion;
 use App\Models\ScratchCard;
+use App\Models\SnakeCell;
 use App\Models\SpinnerImage;
 use App\Models\WhoQuestion;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +56,37 @@ class GameController extends Controller
                 ->get();
 
             return view('games.card-game', compact('game', 'levels'));
+        }
+
+        if ($game->type === 'control') {
+            $cards = ControlCard::active()->orderBy('sort_order')->orderBy('id')->get()
+                ->map(fn ($card) => [
+                    'id' => $card->id,
+                    'title' => $card->title,
+                    'description' => $card->description,
+                    'image' => $card->image ? asset('storage/'.$card->image) : null,
+                ])->values()->toArray();
+
+            return view('games.control-game', compact('game', 'cards'));
+        }
+
+        if ($game->type === 'snakes') {
+            $stored = SnakeCell::whereBetween('number', [1, 100])->get()->keyBy('number');
+            $cells = collect(range(1, 100))->map(function ($number) use ($stored) {
+                $cell = $stored->get($number);
+                $active = $cell && $cell->is_active;
+
+                return [
+                    'number' => $number,
+                    'title' => $active ? $cell->title : 'استراحة',
+                    'content' => $active ? $cell->content : 'خدوا لحظة هادية مع بعض، وبعدها كمّلوا اللعب.',
+                    'mood' => $active ? $cell->mood : 'warm',
+                    'active' => (bool) $active,
+                ];
+            })->all();
+            $boardLinks = config('snakes.links');
+
+            return view('games.snakes-game', compact('game', 'cells', 'boardLinks'));
         }
 
         if ($game->type === 'spinner') {

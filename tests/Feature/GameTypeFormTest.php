@@ -16,7 +16,7 @@ class GameTypeFormTest extends TestCase
 
     public static function types(): array
     {
-        return array_map(fn ($type) => [$type], ['card', 'spinner', 'scratch', 'who', 'challenge', 'know_me']);
+        return array_map(fn ($type) => [$type], ['card', 'spinner', 'scratch', 'who', 'challenge', 'know_me', 'control', 'snakes']);
     }
 
     #[DataProvider('types')]
@@ -29,7 +29,7 @@ class GameTypeFormTest extends TestCase
         @$document->loadHTML($response->getContent());
         $xpath = new \DOMXPath($document);
         $options = $xpath->query('//select[@name="type"]/option');
-        $this->assertCount(6, $options);
+        $this->assertCount(8, $options);
         $selected = $xpath->query('//select[@name="type"]/option[@selected]');
         $this->assertCount(1, $selected);
         $submittedType = $selected->item(0)->getAttribute('value');
@@ -45,7 +45,7 @@ class GameTypeFormTest extends TestCase
         ])->assertSessionHasNoErrors();
         $this->assertSame($type, $game->fresh()->type);
         $this->assertSame("First step\nSecond step", $game->fresh()->how_to_play);
-        $views = ['card' => 'card-game', 'spinner' => 'spinner-game', 'scratch' => 'scratch-game', 'who' => 'who-game', 'challenge' => 'challenge-game', 'know_me' => 'know-me-game'];
+        $views = ['card' => 'card-game', 'spinner' => 'spinner-game', 'scratch' => 'scratch-game', 'who' => 'who-game', 'challenge' => 'challenge-game', 'know_me' => 'know-me-game', 'control' => 'control-game', 'snakes' => 'snakes-game'];
         $this->get('/games/'.$game->slug.'/play')->assertOk()->assertViewIs('games.'.$views[$type]);
         $this->get('/games/'.$game->slug)
             ->assertOk()
