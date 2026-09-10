@@ -56,3 +56,13 @@ body:has(.floating-whatsapp) .purchase-toast-right { bottom: max(100px, calc(env
         background-clip: text;
     }
 }
+
+.checkout-card { padding: 28px; border: 1px solid #ffffff12; border-radius: 24px; background: linear-gradient(135deg, #171324, #111827); }
+.checkout-step { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; background: #9333ea25; border: 1px solid #a855f735; color: #d8b4fe; font-weight: 800; }
+.checkout-label { display: block; font-size: 13px; font-weight: 500; color: #d1d5db; }
+.checkout-input { display: block; width: 100%; min-width: 0; margin-top: 8px; padding: 12px 14px; border: 1px solid #374151; border-radius: 12px; background: #03071280; color: white; font-size: 16px; }
+.checkout-input:focus { outline: 2px solid #a855f7; outline-offset: 1px; }
+.checkout-submit { width: 100%; padding: 14px 20px; border-radius: 12px; background: linear-gradient(110deg, #9333ea, #db2777); color: white; font-size: 15px; font-weight: 700; text-align: center; }
+.checkout-submit:disabled, fieldset:disabled .checkout-submit { opacity: .55; cursor: wait; }
+.checkout-error { padding: 12px 16px; margin-bottom: 16px; border: 1px solid #f8717140; border-radius: 12px; background: #7f1d1d30; color: #fca5a5; font-size: 13px; }
+@media(max-width: 640px) { .checkout-card { padding: 20px 16px; border-radius: 20px; } }

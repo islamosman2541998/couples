@@ -1,110 +1,95 @@
 <x-app-layout>
     <x-slot name="title">الاشتراك في {{ $game->name }}</x-slot>
-
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- Header -->
-        <div class="text-center mb-10">
-            <div class="text-6xl mb-4">💳</div>
-            <h1 class="text-3xl font-black mb-2">الاشتراك في {{ $game->name }}</h1>
-            <p class="text-gray-400">أكمل بيانات الاشتراك وارفع إيصال التحويل </p>
+    @php
+        $checkoutData = [
+            'user' => auth()->user()?->only(['name', 'email', 'phone']),
+            'gameId' => $game->id,
+            'games' => $paidGames->map(fn ($item) => $item->only(['id', 'name', 'price']))->values(),
+        ];
+    @endphp
+    <div class="checkout-page max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14" x-data="checkout({{ \Illuminate\Support\Js::from($checkoutData) }})">
+        <div class="text-center mb-8">
+            <span class="inline-block rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 text-sm text-purple-300 mb-4">خطوتين… وتبدأ الحكاية ♡</span>
+            <h1 class="text-2xl sm:text-3xl font-black mb-3">الاشتراك في <span x-text="currentGame?.name">{{ $game->name }}</span></h1>
+            <p class="text-gray-400 text-sm">سجّل بياناتك، حوّل المبلغ وارفع الإيصال من نفس الصفحة.</p>
         </div>
 
-        <!-- Bank Info -->
-        <div class="bg-blue-900/20 border border-blue-700/40 rounded-2xl p-6 mb-8">
-            <h3 class="font-bold text-blue-300 mb-4 flex items-center gap-2">🏦 بيانات التحويل </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                {{-- <div>
-                    <span class="text-gray-500">اسم البنك:</span>
-                    <div class="text-white font-medium mt-1">{{ \App\Models\Setting::get('bank_name', 'البنك الأهلي') }}</div>
-                </div>
-                <div>
-                    <span class="text-gray-500">اسم الحساب:</span>
-                    <div class="text-white font-medium mt-1">{{ \App\Models\Setting::get('bank_holder', 'صاحب الحساب') }}</div>
-                </div> --}}
-                <div class="sm:col-span-2">
-                    <span class="text-gray-500">رقم التحويل فودافون كاش</span>
-                    <div class="text-white font-mono font-bold mt-1 bg-gray-800 px-3 py-2 rounded-lg text-sm tracking-wider">
-                        {{ \App\Models\Setting::get('bank_account', 'SA00 0000 0000 0000 0000 0000') }}
+        <div x-show="!success">
+            <section class="checkout-card mb-6" aria-labelledby="checkout-account-heading">
+                <div class="flex items-center gap-3 mb-5"><span class="checkout-step">1</span><div><h2 id="checkout-account-heading" class="font-bold text-lg">حسابك أولاً</h2><p class="text-gray-400 text-xs mt-1">علشان تلاقي لعبتك واشتراكك في مكان واحد</p></div></div>
+                <div x-show="!user" @if(auth()->check()) x-cloak @endif>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-950 rounded-xl mb-5" role="group" aria-label="نوع الحساب">
+                        <button type="button" @click="switchMode('register')" :disabled="authBusy" :aria-pressed="mode === 'register'" :class="mode === 'register' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400'" class="rounded-lg py-3 font-bold text-sm transition-colors">مستخدم جديد</button>
+                        <button type="button" @click="switchMode('login')" :disabled="authBusy" :aria-pressed="mode === 'login'" :class="mode === 'login' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400'" class="rounded-lg py-3 font-bold text-sm transition-colors">لديك حساب</button>
                     </div>
+                    <div x-show="authErrors.length" x-cloak class="checkout-error" role="alert"><template x-for="(error, index) in authErrors" :key="index"><p x-text="error"></p></template></div>
+                    <form x-show="mode === 'register'" action="{{ route('checkout.register') }}" method="POST" @submit.prevent="authenticate($el)" class="space-y-4">
+                        @csrf
+                        <fieldset :disabled="authBusy" class="space-y-4">
+                            <label class="checkout-label">الاسم الكامل<input class="checkout-input" name="name" autocomplete="name" maxlength="255" required placeholder="اكتب اسمك"></label>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <label class="checkout-label">البريد الإلكتروني<input class="checkout-input" type="email" name="email" autocomplete="email" maxlength="255" dir="ltr" required placeholder="name@example.com"></label>
+                                <label class="checkout-label">رقم الموبايل<input class="checkout-input" type="tel" name="phone" autocomplete="tel" maxlength="20" dir="ltr" required placeholder="01xxxxxxxxx"></label>
+                            </div>
+                            <label class="checkout-label">كلمة المرور<input class="checkout-input" type="password" name="password" autocomplete="new-password" minlength="8" required placeholder="8 أحرف على الأقل"></label>
+                            <button class="checkout-submit" type="submit" x-text="authBusy ? 'جارٍ حفظ الحساب…' : 'حفظ الحساب ومتابعة الدفع ←'">حفظ الحساب ومتابعة الدفع ←</button>
+                        </fieldset>
+                    </form>
+                    <form x-show="mode === 'login'" x-cloak action="{{ route('checkout.login') }}" method="POST" @submit.prevent="authenticate($el)" class="space-y-4">
+                        @csrf
+                        <fieldset :disabled="authBusy" class="space-y-4">
+                            <label class="checkout-label">البريد الإلكتروني<input class="checkout-input" type="email" name="email" autocomplete="username" dir="ltr" required></label>
+                            <label class="checkout-label">كلمة المرور<input class="checkout-input" type="password" name="password" autocomplete="current-password" required></label>
+                            <a href="{{ route('password.request') }}" target="_blank" rel="noopener" class="inline-block text-xs text-purple-300">نسيت كلمة المرور؟</a>
+                            <button class="checkout-submit" type="submit" x-text="authBusy ? 'جارٍ تسجيل الدخول…' : 'تسجيل الدخول ومتابعة الدفع ←'">تسجيل الدخول ومتابعة الدفع ←</button>
+                        </fieldset>
+                    </form>
                 </div>
-                <div class="sm:col-span-2">
-                    <span class="text-yellow-400 font-bold">المبلغ المطلوب: {{ number_format($game->price, 2) }}  </span>
+                <div x-show="user" @if(!auth()->check()) x-cloak @endif class="rounded-xl bg-green-500/10 border border-green-500/20 p-4">
+                    <p class="text-green-300 font-bold">✓ أهلاً <span x-text="user?.name">{{ auth()->user()?->name }}</span>، حسابك جاهز</p>
+                    <p class="text-gray-400 text-sm mt-1 break-all" x-text="user?.email">{{ auth()->user()?->email }}</p>
+                    <p class="text-sm mt-2 text-gray-300">كمّل التحويل وارفع الإيصال بالأسفل.</p>
                 </div>
-            </div>
+            </section>
+
+            <section x-ref="payment" class="checkout-card scroll-mt-24" aria-labelledby="checkout-payment-heading">
+                <div class="flex items-center gap-3 mb-5"><span class="checkout-step">2</span><div><h2 id="checkout-payment-heading" class="font-bold text-lg">الدفع وتأكيد الاشتراك</h2><p class="text-gray-400 text-xs mt-1">حوّل المبلغ ثم ارفع صورة الإيصال للمراجعة</p></div></div>
+                <label class="checkout-label mb-5">اللعبة المراد الاشتراك فيها<select class="checkout-input" x-model="selectedGame" :disabled="paymentBusy">@foreach($paidGames as $item)<option value="{{ $item->id }}" @selected($item->id === $game->id)>{{ $item->name }} — {{ number_format($item->price, 2) }}</option>@endforeach</select></label>
+                <div class="rounded-xl bg-blue-900/20 border border-blue-500/25 p-5 mb-6">
+                    <h3 class="text-blue-300 font-bold mb-3">بيانات التحويل · فودافون كاش</h3>
+                    <p class="text-gray-400 text-xs mb-2">رقم التحويل</p>
+                    <p class="font-mono text-lg font-bold break-all bg-gray-950/50 rounded-lg px-3 py-2" dir="ltr">{{ \App\Models\Setting::get('bank_account', '') }}</p>
+                    <div class="flex items-center justify-between gap-4 mt-4"><span class="text-sm text-gray-300">المبلغ المطلوب</span><strong class="text-2xl text-yellow-300" x-text="amount">{{ number_format($game->price, 2) }}</strong></div>
+                </div>
+                <p x-show="!user" class="text-amber-300 text-sm mb-4">أنشئ حساباً أو سجّل الدخول بالأعلى لتكمل إرسال الإيصال.</p>
+                <div x-show="paymentErrors.length" x-cloak class="checkout-error" role="alert"><template x-for="(error, index) in paymentErrors" :key="index"><p x-text="error"></p></template></div>
+                <form method="POST" action="{{ route('subscribe.store') }}" enctype="multipart/form-data" @submit.prevent="submitPayment($el)">
+                    @csrf
+                    <input type="hidden" name="game_id" :value="selectedGame" value="{{ $game->id }}">
+                    <fieldset :disabled="!user || paymentBusy" class="space-y-4 disabled:opacity-60">
+                        <label class="checkout-label">الاسم الكامل<input class="checkout-input" name="full_name" x-model="details.full_name" autocomplete="name" maxlength="255" required></label>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="checkout-label">رقم الموبايل<input class="checkout-input" name="phone" x-model="details.phone" type="tel" autocomplete="tel" maxlength="20" dir="ltr" required></label>
+                            <label class="checkout-label">البريد الإلكتروني<input class="checkout-input" name="email" x-model="details.email" type="email" autocomplete="email" maxlength="255" dir="ltr" required></label>
+                        </div>
+                        <label class="checkout-label">صورة إيصال التحويل
+                            <span class="block border-2 border-dashed border-purple-500/30 rounded-xl p-5 mt-2 text-center bg-purple-500/5">
+                                <span class="block text-3xl mb-2" aria-hidden="true">📸</span>
+                                <span class="block text-xs text-gray-400 mb-3">JPG، PNG، WEBP — حتى 5 ميجابايت</span>
+                                <input type="file" name="receipt_image" accept="image/jpeg,image/png,image/webp" @change="chooseReceipt($event)" class="block w-full text-xs text-gray-300 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:px-3 file:py-2 file:ml-3" required>
+                                <img x-show="preview" x-cloak :src="preview" alt="معاينة إيصال التحويل" class="max-h-56 max-w-full mx-auto rounded-xl mt-4">
+                            </span>
+                        </label>
+                        <button type="submit" class="checkout-submit" x-text="paymentBusy ? 'جارٍ رفع الإيصال…' : 'إرسال طلب الاشتراك ✓'">إرسال طلب الاشتراك ✓</button>
+                    </fieldset>
+                </form>
+            </section>
         </div>
-
-        <!-- Form -->
-        <form method="POST" action="{{ route('subscribe.store') }}" enctype="multipart/form-data"
-              class="bg-gray-900 rounded-2xl border border-gray-800 p-8 space-y-6">
-            @csrf
-
-            <input type="hidden" name="game_id" value="{{ $game->id }}">
-
-            <!-- Game Select -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">اللعبة المراد الاشتراك فيها</label>
-                <select name="game_id" onchange="window.location.href = '{{ url('/subscribe') }}/' + this.value" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    @foreach($paidGames as $g)
-                        <option value="{{ $g->id }}" {{ $g->id == $game->id ? 'selected' : '' }}>
-                            {{ $g->name }} - {{ number_format($g->price, 0) }} ر
-                        </option>
-                    @endforeach
-                </select>
-                @error('game_id')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <!-- Name -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">الاسم الكامل *</label>
-                <input type="text" name="full_name" value="{{ old('full_name', auth()->user()?->name) }}"
-                       placeholder="أدخل اسمك الكامل"
-                       class="w-full bg-gray-800 border @error('full_name') border-red-500 @else border-gray-700 @enderror rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                @error('full_name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <!-- Phone -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">رقم الجوال *</label>
-                <input type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}"
-                       placeholder="05xxxxxxxx" dir="ltr"
-                       class="w-full bg-gray-800 border @error('phone') border-red-500 @else border-gray-700 @enderror rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                @error('phone')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <!-- Email -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">البريد الإلكتروني *</label>
-                <input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}"
-                       placeholder="example@email.com" dir="ltr"
-                       class="w-full bg-gray-800 border @error('email') border-red-500 @else border-gray-700 @enderror rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <!-- Receipt Image -->
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">صورة إيصال التحويل البنكي *</label>
-                <div x-data="{ preview: null }"
-                     class="border-2 border-dashed @error('receipt_image') border-red-500 @else border-gray-700 @enderror rounded-xl p-6 text-center hover:border-purple-500 transition-colors cursor-pointer"
-                     @click="$refs.fileInput.click()">
-                    <input type="file" name="receipt_image" accept="image/*" x-ref="fileInput" class="hidden"
-                           @change="const file = $event.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = e => preview = e.target.result; reader.readAsDataURL(file); }">
-                    <div x-show="!preview">
-                        <div class="text-4xl mb-2">📸</div>
-                        <p class="text-gray-400 text-sm">اضغط لرفع صورة الإيصال</p>
-                        <p class="text-gray-600 text-xs mt-1">JPG, PNG, WEBP - حتى 5 ميجابايت</p>
-                    </div>
-                    <div x-show="preview" x-cloak>
-                        <img :src="preview" class="max-h-48 mx-auto rounded-lg">
-                        <p class="text-green-400 text-xs mt-2">✅ تم اختيار الصورة</p>
-                    </div>
-                </div>
-                @error('receipt_image')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <button type="submit"
-                    class="w-full bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105">
-                إرسال طلب الاشتراك 🚀
-            </button>
-        </form>
+        <section x-show="success" x-cloak x-ref="success" tabindex="-1" role="status" class="checkout-card text-center">
+            <div class="text-5xl mb-5">✓</div><h2 class="text-2xl font-black text-green-300 mb-4">تم إرسال طلبك بنجاح!</h2>
+            <p class="text-gray-300 leading-relaxed mb-6" x-text="successMessage"></p>
+            <a href="{{ route('profile.index') }}" class="checkout-submit inline-block">متابعة طلباتي من ملفي الشخصي ←</a>
+        </section>
+        <noscript><p class="checkout-error">فعّل JavaScript لإتمام إنشاء الحساب ورفع الإيصال داخل الصفحة.</p></noscript>
     </div>
 </x-app-layout>

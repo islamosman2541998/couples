@@ -16,7 +16,7 @@
 <body class="bg-gray-950 text-white min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-gray-900/95 backdrop-blur-sm border-b border-purple-900/50 sticky top-0 z-50">
+    <nav x-data="{ checkoutUser: null }" @checkout-authenticated.window="checkoutUser = $event.detail" class="bg-gray-900/95 backdrop-blur-sm border-b border-purple-900/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="{{ route('home') }}" class="text-sm sm:text-xl whitespace-nowrap font-black bg-gradient-to-l from-pink-500 to-purple-600 bg-clip-text text-transparent">
@@ -52,8 +52,9 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-300 hover:text-white text-xs sm:text-sm whitespace-nowrap"><span class="sm:hidden">دخول</span><span class="hidden sm:inline">تسجيل الدخول</span></a>
-                        <a href="{{ route('register') }}" class="bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl font-medium transition-all whitespace-nowrap">إنشاء حساب</a>
+                        <a x-show="!checkoutUser" href="{{ route('login') }}" class="text-gray-300 hover:text-white text-xs sm:text-sm whitespace-nowrap"><span class="sm:hidden">دخول</span><span class="hidden sm:inline">تسجيل الدخول</span></a>
+                        <a x-show="!checkoutUser" href="{{ route('register') }}" class="bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl font-medium transition-all whitespace-nowrap">إنشاء حساب</a>
+                        <a x-show="checkoutUser" x-cloak href="{{ route('profile.index') }}" class="text-purple-300 text-sm font-bold">ملفي الشخصي ✓</a>
                     @endauth
                 </div>
             </div>

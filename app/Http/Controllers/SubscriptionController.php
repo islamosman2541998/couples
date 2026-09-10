@@ -28,7 +28,7 @@ class SubscriptionController extends Controller
             'full_name'     => 'required|string|max:255',
             'phone'         => 'required|string|max:20',
             'email'         => 'required|email|max:255',
-            'receipt_image' => 'required|image|max:5120',
+            'receipt_image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ], [
             'game_id.required'       => 'يرجى اختيار اللعبة',
             'full_name.required'     => 'يرجى إدخال الاسم الكامل',
@@ -44,6 +44,10 @@ class SubscriptionController extends Controller
         $validated['status'] = 'pending';
 
         Subscription::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'تم استلام طلب الاشتراك وإيصال التحويل. سنراجع الطلب ونفعّل اللعبة بعد الموافقة.'], 201);
+        }
 
         return redirect()->route('subscribe.success')->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعته قريباً.');
     }
