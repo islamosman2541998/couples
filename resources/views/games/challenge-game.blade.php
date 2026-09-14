@@ -69,33 +69,31 @@
             </div>
 
             <!-- Card -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex flex-col">
 
                 <!-- Card Face -->
-                <div x-show="!showCard"
+                <button type="button" x-show="!showCard"
                      @click="flipCard()"
-                     class="flex-1 bg-gradient-to-br from-purple-900 to-pink-950 border-2 border-purple-700/40 rounded-3xl flex flex-col items-center justify-center cursor-pointer shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] min-h-72 mb-5">
+                     class="w-full aspect-[2/3] bg-gradient-to-br from-purple-900 to-pink-950 border-2 border-purple-700/40 rounded-3xl flex flex-col items-center justify-center cursor-pointer shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-purple-400 mb-5">
                     <div class="text-7xl mb-4 animate-pulse">🎯</div>
                     <div class="text-xl font-bold text-white/80">اضغط لكشف التحدي</div>
                     <div class="text-gray-500 text-sm mt-2">تحدي <span x-text="currentIndex + 1"></span></div>
-                </div>
+                </button>
 
                 <!-- Card Content -->
-                <div x-show="showCard" x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 scale-90"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     class="flex-1 flex flex-col rounded-3xl overflow-hidden border-2 shadow-2xl min-h-72 mb-5"
+                <template x-if="screen === 'game' && showCard && currentCard">
+                <div>
+                <div class="rounded-3xl overflow-hidden border shadow-2xl mb-5"
                      :style="`border-color: ${currentCard?.category_color}40`">
 
                     <!-- Image -->
                     <template x-if="currentCard?.image">
-                        <div class="relative flex-1 min-h-52">
+                        <div class="relative">
                             <img :src="currentCard.image"
-                                 class="w-full h-full object-cover"
-                                 style="max-height: 320px;">
+                                 :alt="currentCard.title || 'كارت التحدي'"
+                                 class="block w-full h-auto object-contain">
                             <!-- Category badge -->
-                            <div class="absolute top-3 right-3">
+                            <div class="absolute top-3 right-3 pointer-events-none">
                                 <span class="px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-sm"
                                       :style="`background-color: ${currentCard.category_color}30; color: ${currentCard.category_color}; border: 1px solid ${currentCard.category_color}50`"
                                       x-text="`${currentCard.category_emoji} ${currentCard.category_label}`"></span>
@@ -112,13 +110,18 @@
                     </template>
 
                     <!-- Text content -->
-                    <div class="p-5" :style="`background: linear-gradient(to top, #111827, #111827ee)`">
+                    <template x-if="!currentCard.image">
+                    <div class="p-5 bg-gray-900">
                         <h2 class="text-xl font-black text-white mb-2" x-text="currentCard?.title"></h2>
                         <p x-show="currentCard?.description"
                            class="text-gray-300 text-sm leading-relaxed" x-text="currentCard?.description"></p>
 
-                        <!-- Timer -->
-                        <div x-show="currentCard?.timer > 0" class="mt-4">
+                    </div>
+                    </template>
+                </div>
+
+                        <!-- Timer stays outside the image card. -->
+                        <div x-show="currentCard?.timer > 0" class="mb-5">
                             <div x-show="!timerRunning && !timerDone"
                                  class="flex items-center gap-3">
                                 <button @click="startTimer()"
@@ -140,8 +143,8 @@
                                 <span class="text-green-400 font-bold text-lg">⏰ انتهى الوقت!</span>
                             </div>
                         </div>
-                    </div>
                 </div>
+                </template>
 
                 <!-- Actions -->
                 <div x-show="showCard" x-cloak class="flex gap-3">
