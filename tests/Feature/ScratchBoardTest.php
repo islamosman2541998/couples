@@ -17,6 +17,7 @@ class ScratchBoardTest extends TestCase
 
     public function test_board_expansion_preserves_existing_tasks_and_builds_three_levels(): void
     {
+        $this->signInMember();
         $old = ScratchCard::create(['number' => 1, 'content' => 'My existing task', 'image' => 'scratch/my-image.jpg', 'is_active' => true]);
         $this->seed(ScratchBoardSeeder::class);
         $this->assertDatabaseCount('scratch_cards', 100);
@@ -46,9 +47,9 @@ class ScratchBoardTest extends TestCase
 
     public function test_the_opened_task_fetches_the_latest_uploaded_image(): void
     {
-        Storage::fake('public');
+        Storage::fake('premium');
         $admin = User::factory()->create(['is_admin' => true]);
-        $this->actingAs($admin);
+        $this->signInMember($admin);
 
         $this->post('/admin/scratch-cards', [
             'number' => 10,
@@ -60,7 +61,7 @@ class ScratchBoardTest extends TestCase
 
         $card = ScratchCard::firstOrFail();
         $firstImage = $card->image;
-        Storage::disk('public')->assertExists($firstImage);
+        Storage::disk('premium')->assertExists($firstImage);
 
         Game::create(['name' => 'Scratch', 'slug' => 'scratch', 'type' => 'scratch', 'is_free' => true, 'is_active' => true]);
         $this->get('/games/scratch/play')
@@ -70,7 +71,7 @@ class ScratchBoardTest extends TestCase
         $latestCardResponse = $this->getJson('/games/scratch/scratch-cards/10')
             ->assertOk()
             ->assertJsonPath('number', 10)
-            ->assertJsonPath('image', fn ($url) => str_contains($url, $firstImage));
+            ->assertJsonPath('image', fn ($url) => str_contains($url, '/game-media/scratch/'.$card->id));
         $this->assertStringContainsString('no-store', $latestCardResponse->headers->get('Cache-Control'));
 
         $this->put('/admin/scratch-cards/'.$card->id, [
@@ -83,10 +84,10 @@ class ScratchBoardTest extends TestCase
 
         $replacementImage = $card->fresh()->image;
         $this->assertNotSame($firstImage, $replacementImage);
-        Storage::disk('public')->assertMissing($firstImage);
-        Storage::disk('public')->assertExists($replacementImage);
+        Storage::disk('premium')->assertMissing($firstImage);
+        Storage::disk('premium')->assertExists($replacementImage);
         $this->getJson('/games/scratch/scratch-cards/10')
             ->assertOk()
-            ->assertJsonPath('image', fn ($url) => str_contains($url, $replacementImage));
+            ->assertJsonPath('image', fn ($url) => str_contains($url, '/game-media/scratch/'.$card->id));
     }
 }

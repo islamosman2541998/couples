@@ -33,7 +33,7 @@ class GameAuditTest extends TestCase
     {
         $game = $this->game($type);
         $this->get('/games/'.$game->slug)->assertOk();
-        $this->get('/games/'.$game->slug.'/play')->assertOk();
+        $this->get('/games/'.$game->slug.'/play')->assertRedirect(route('subscribe.create', $game->id));
         $game->update(['is_free' => false]);
         $this->get('/games/'.$game->slug.'/play')->assertRedirect(route('subscribe.create', $game->id));
         $user = User::factory()->create();
@@ -51,7 +51,7 @@ class GameAuditTest extends TestCase
 
     public function test_card_api_requires_the_correct_game_subscription_and_filters_content(): void
     {
-        $game = $this->game('card', ['is_free' => false]);
+        $game = $this->game('card', ['is_free' => false, 'price' => 100]);
         $level = CardLevel::create(['name' => "Test's level", 'slug' => 'easy', 'color' => '#ffffff']);
         foreach (['male', 'female', 'both'] as $target) {
             Card::create(['card_level_id' => $level->id, 'content' => $target, 'target' => $target, 'is_active' => true]);
@@ -72,13 +72,14 @@ class GameAuditTest extends TestCase
         $sub->update(['expires_at' => now()->subDay()]);
         $this->getJson($url)->assertForbidden();
         $game->update(['is_free' => true]);
-        $this->getJson($url)->assertOk();
+        $this->getJson($url)->assertForbidden();
         $game->update(['is_active' => false]);
         $this->getJson($url)->assertNotFound();
     }
 
     public function test_game_pages_render_populated_content_and_exclude_inactive_items(): void
     {
+        $this->signInMember();
         $fixtures = [
             'spinner' => [SpinnerImage::class, ['name' => 'Visible item', 'image' => 'spinner/placeholder.png', 'color' => '#ffffff'], 'spinnerData'],
             'scratch' => [ScratchCard::class, ['number' => 1, 'content' => 'Visible item'], 'cards'],
@@ -99,7 +100,7 @@ class GameAuditTest extends TestCase
     {
         Storage::fake('public');
         Storage::fake('local');
-        $game = $this->game('card', ['is_free' => false]);
+        $game = $this->game('card', ['is_free' => false, 'price' => 100]);
         $this->post('/subscribe')->assertRedirect(route('login'));
         $user = User::factory()->create();
         $payload = ['game_id' => $game->id, 'full_name' => 'Test', 'phone' => '01234567890', 'email' => $user->email, 'receipt_image' => UploadedFile::fake()->image('receipt.png')];

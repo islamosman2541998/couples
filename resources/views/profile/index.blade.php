@@ -42,10 +42,10 @@
                     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center text-2xl">
-                                {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$sub->game->type] ?? '🃏' }}
+                                {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$sub->game?->type] ?? '🃏' }}
                             </div>
                             <div>
-                                <div class="font-bold">{{ $sub->game->name }}</div>
+                                <div class="font-bold">{{ $sub->product_name }}</div>
                                 <div class="text-xs text-gray-500 mt-1">{{ optional($sub->created_at)->format('Y/m/d') ?? '-' }}</div>
                             </div>
                         </div>
@@ -57,7 +57,7 @@
                                 {{ $sub->status_label }}
                             </span>
                             @if($sub->status === 'approved')
-                                <a href="{{ route('games.play', $sub->game->slug) }}"
+                                <a href="{{ ($sub->is_bundle ? route('home').'#games' : route('games.play', $sub->game->slug)) }}"
                                    class="bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
                                     العب
                                 </a>

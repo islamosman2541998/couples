@@ -22,12 +22,14 @@ use Illuminate\Support\Facades\Route;
 
 // ==================== Frontend ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/game-media/{type}/{id}', [\App\Http\Controllers\GameMediaController::class, 'show'])->whereNumber('id')->name('games.media');
 Route::get('/games/{slug}/scratch-cards/{number}', [GameController::class, 'scratchCard'])
     ->whereNumber('number')
     ->name('games.scratch-card');
 Route::get('/games/{slug}', [GameController::class, 'show'])->name('games.show');
 Route::get('/games/{slug}/play', [GameController::class, 'play'])->name('games.play');
 Route::get('/subscribe/success', [SubscriptionController::class, 'success'])->name('subscribe.success');
+Route::get('/membership', [SubscriptionController::class, 'bundle'])->name('subscribe.bundle');
 Route::post('/checkout/register', [\App\Http\Controllers\CheckoutAuthController::class, 'register'])->middleware('throttle:6,1')->name('checkout.register');
 Route::post('/checkout/login', [\App\Http\Controllers\CheckoutAuthController::class, 'login'])->middleware('throttle:10,1')->name('checkout.login');
 Route::get('/subscribe/{gameId}', [SubscriptionController::class, 'create'])->whereNumber('gameId')->name('subscribe.create');

@@ -35,7 +35,7 @@ class ChallengeCardController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('challenges', 'public');
+            $data['image'] = $request->file('image')->store('challenges', 'premium');
         }
 
         $data['is_active']  = $request->boolean('is_active');
@@ -68,9 +68,9 @@ class ChallengeCardController extends Controller
 
         if ($request->hasFile('image')) {
             if ($challengeCard->image) {
-                Storage::disk('public')->delete($challengeCard->image);
+                Storage::disk('premium')->delete($challengeCard->image);
             }
-            $data['image'] = $request->file('image')->store('challenges', 'public');
+            $data['image'] = $request->file('image')->store('challenges', 'premium');
         }
 
         $data['is_active']  = $request->boolean('is_active');
@@ -86,7 +86,7 @@ class ChallengeCardController extends Controller
     public function destroy(ChallengeCard $challengeCard)
     {
         if ($challengeCard->image) {
-            Storage::disk('public')->delete($challengeCard->image);
+            Storage::disk('premium')->delete($challengeCard->image);
         }
         $challengeCard->delete();
 

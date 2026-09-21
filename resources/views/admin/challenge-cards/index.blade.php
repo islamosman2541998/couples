@@ -26,7 +26,7 @@
                         <tr class="hover:bg-gray-800/40 transition-colors">
                             <td class="p-4">
                                 @if($card->image)
-                                    <img src="{{ asset('storage/' . $card->image) }}"
+                                    <img src="{{ $card->image_url }}"
                                          class="w-16 h-16 rounded-xl object-cover border border-gray-700">
                                 @else
                                     <div class="w-16 h-16 rounded-xl bg-gray-800 flex items-center justify-center text-2xl">

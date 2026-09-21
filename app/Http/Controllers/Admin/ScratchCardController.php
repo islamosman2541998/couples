@@ -33,7 +33,7 @@ class ScratchCardController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('scratch', 'public');
+            $data['image'] = $request->file('image')->store('scratch', 'premium');
         }
 
         $data['is_active']  = $request->boolean('is_active');
@@ -63,9 +63,9 @@ class ScratchCardController extends Controller
 
         if ($request->hasFile('image')) {
             if ($scratchCard->image) {
-                Storage::disk('public')->delete($scratchCard->image);
+                Storage::disk('premium')->delete($scratchCard->image);
             }
-            $data['image'] = $request->file('image')->store('scratch', 'public');
+            $data['image'] = $request->file('image')->store('scratch', 'premium');
         }
 
         $data['is_active']  = $request->boolean('is_active');
@@ -80,7 +80,7 @@ class ScratchCardController extends Controller
     public function destroy(ScratchCard $scratchCard)
     {
         if ($scratchCard->image) {
-            Storage::disk('public')->delete($scratchCard->image);
+            Storage::disk('premium')->delete($scratchCard->image);
         }
         $scratchCard->delete();
 

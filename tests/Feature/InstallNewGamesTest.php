@@ -30,6 +30,7 @@ class InstallNewGamesTest extends TestCase
         $this->assertDatabaseCount('control_cards', 50);
         $this->assertDatabaseCount('snake_cells', 100);
         $this->get('/')->assertSee('لعبة السيطرة')->assertSee('السلم والتعبان');
+        $this->signInMember(auth()->user());
         $this->get('/games/control-game/play')->assertOk();
         $this->get('/games/snakes-and-ladders/play')->assertOk();
         $game = Game::where('type', 'control')->firstOrFail();

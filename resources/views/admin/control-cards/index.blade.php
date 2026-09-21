@@ -10,7 +10,7 @@
                 @forelse($cards as $card)
                     <tr>
                         <td class="p-4 min-w-64">
-                            @if($card->image)<img src="{{ asset('storage/'.$card->image) }}" alt="{{ $card->title }}" class="w-16 h-16 object-cover rounded-lg mb-2">@endif
+                            @if($card->image)<img src="{{ $card->image_url }}" alt="{{ $card->title }}" class="w-16 h-16 object-cover rounded-lg mb-2">@endif
                             <strong>{{ $card->title }}</strong><p class="text-gray-400 mt-1 line-clamp-2">{{ $card->description }}</p>
                         </td>
                         <td class="p-4">{{ $card->sort_order }}</td>

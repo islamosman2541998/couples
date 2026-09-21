@@ -45,7 +45,7 @@
                                 <div class="font-medium text-sm">{{ $sub->full_name }}</div>
                                 <div class="text-xs text-gray-500">{{ $sub->email }}</div>
                             </td>
-                            <td class="p-4 text-sm text-gray-300">{{ $sub->game->name }}</td>
+                            <td class="p-4 text-sm text-gray-300">{{ $sub->product_name }}</td>
                             <td class="p-4 text-sm font-mono text-gray-400">{{ $sub->phone }}</td>
                             <td class="p-4">
                                 <span class="px-2 py-1 text-xs rounded-full

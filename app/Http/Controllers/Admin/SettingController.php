@@ -18,6 +18,7 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate(['membership_price' => 'nullable|numeric|min:1|max:999999']);
         $groups = ['general', 'contact', 'social', 'pages'];
 
         foreach ($request->except(['_token', '_method']) as $key => $value) {

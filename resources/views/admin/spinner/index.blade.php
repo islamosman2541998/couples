@@ -9,7 +9,7 @@
             <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden group">
                 <div class="h-32 relative" style="background-color: {{ $image->color }}20">
                     @if($image->image !== 'spinner/placeholder.png')
-                        <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->name }}"
+                        <img src="{{ $image->image_url }}" alt="{{ $image->name }}"
                              class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-4xl">🎡</div>

@@ -30,7 +30,7 @@ class SpinnerController extends Controller
             'sort_order' => 'integer',
         ]);
         $validated['is_active'] = $request->boolean('is_active');
-        $validated['image'] = $request->file('image')->store('spinner', 'public');
+        $validated['image'] = $request->file('image')->store('spinner', 'premium');
 
         SpinnerImage::create($validated);
         return redirect()->route('admin.spinner-images.index')->with('success', 'تم إضافة الصورة بنجاح');
@@ -54,20 +54,20 @@ class SpinnerController extends Controller
 
         $oldImage = $spinnerImage->image;
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('spinner', 'public');
+            $validated['image'] = $request->file('image')->store('spinner', 'premium');
             abort_unless($validated['image'], 500, 'تعذر حفظ الصورة. حاول مرة أخرى.');
         }
 
         $spinnerImage->update($validated);
         if ($request->hasFile('image') && $oldImage && $oldImage !== 'spinner/placeholder.png') {
-            Storage::disk('public')->delete($oldImage);
+            Storage::disk('premium')->delete($oldImage);
         }
         return redirect()->route('admin.spinner-images.index')->with('success', 'تم تحديث الصورة بنجاح');
     }
 
     public function destroy(SpinnerImage $spinnerImage)
     {
-        Storage::disk('public')->delete($spinnerImage->image);
+        Storage::disk('premium')->delete($spinnerImage->image);
         $spinnerImage->delete();
         return back()->with('success', 'تم حذف الصورة بنجاح');
     }

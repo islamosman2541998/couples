@@ -33,6 +33,7 @@ class SnakesGameTest extends TestCase
 
     public function test_board_has_safe_links_and_hides_disabled_task_text(): void
     {
+        $this->signInMember();
         $this->seed(SnakesGameSeeder::class);
         SnakeCell::where('number', 10)->update(['is_active' => false, 'content' => 'Hidden content']);
         $this->get('/')->assertOk()->assertSee('/games/snakes-and-ladders/play');

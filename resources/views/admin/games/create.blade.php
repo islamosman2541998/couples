@@ -51,7 +51,7 @@
                         <input type="checkbox" name="is_free" value="1" {{ old('is_free', '1') ? 'checked' : '' }}
                                class="w-4 h-4 rounded accent-purple-600"
                                x-model="isFree">
-                        <span class="text-sm font-medium text-gray-300">لعبة مجانية</span>
+                        <span class="text-sm font-medium text-gray-300">ضمن باقة كل الألعاب فقط</span>
                     </label>
                 </div>
 

@@ -20,7 +20,7 @@ class SpinnerImage extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return asset('storage/' . $this->image);
+        return route('games.media', ['type' => 'spinner', 'id' => $this->id]);
     }
 
     public function scopeActive($query)

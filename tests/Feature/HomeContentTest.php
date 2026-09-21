@@ -18,7 +18,7 @@ class HomeContentTest extends TestCase
     public function test_home_renders_defaults_and_hides_disabled_items(): void
     {
         $this->assertCount(100, HomeContent::defaults()['names']);
-        $this->get('/')->assertOk()->assertSee('data-home-slider', false)->assertSee('data-countdown', false);
+        $this->get('/')->assertOk()->assertSee('مودكم إيه النهارده؟')->assertSee('باقة كل الألعاب');
         Setting::set('home_slides', json_encode([
             ['id' => 'hidden', 'title' => 'Hidden slide', 'enabled' => false, 'sort_order' => 0],
         ]));

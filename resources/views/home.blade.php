@@ -1,165 +1,45 @@
 <x-app-layout>
-    <x-slot name="title">{{ \App\Models\Setting::get('site_name', 'Funny Couples ') }} - الصفحة الرئيسية</x-slot>
-
-    @include('home.slider')
-    @include('home.promotion')
-
-    @if(!$homeSettings['slider_enabled'] || !count($slides))
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-gray-950 to-pink-900/30"></div>
-        <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 50%, rgba(139,92,246,0.15) 0%, transparent 60%);"></div>
-
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-            <div class="inline-flex items-center gap-2 bg-purple-900/50 border border-purple-700/50 text-purple-300 px-4 py-2 rounded-full text-sm mb-6">
-                <span>🎮</span> منصة الألعاب الترفيهية
-            </div>
-            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">
-                العب <span class="bg-gradient-to-l from-pink-400 to-purple-400 bg-clip-text text-transparent">وتمتع</span>
-                <br>مع من تحب
-            </h1>
-            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-                ألعاب ترفيهية مميزة تجمعك مع شريكك في لحظات لا تُنسى. اكتشف تحديات ممتعة وذكريات جميلة.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#games" class="bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105">
-                    ابدأ اللعب الآن 🚀
-                </a>
-                @guest
-                    <a href="{{ route('register') }}" class="border border-purple-500/50 text-purple-300 hover:bg-purple-900/30 px-8 py-4 rounded-2xl font-bold text-lg transition-all">
-                        إنشاء حساب مجاني
-                    </a>
-                @endguest
-            </div>
-        </div>
-    </section>
-
-    @endif
-    <!-- Free Games -->
-    <div id="games" class="scroll-mt-20"></div>
-    @if($freeGames->isNotEmpty())
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-1.5 h-8 bg-gradient-to-b from-green-400 to-green-600 rounded-full"></div>
-            <h2 class="text-2xl font-black">الألعاب المجانية</h2>
-            <span class="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/30">مجاني</span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($freeGames as $game)
-                <div class="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-green-500/50 transition-all hover:transform hover:-translate-y-1">
-                    <div class="h-48 bg-gradient-to-br from-green-900/40 to-teal-900/40 flex items-center justify-center text-6xl relative">
-                        @if($game->image)
-                            <img src="{{ $game->image_url }}" alt="{{ $game->name }}" class="w-full h-full object-cover absolute inset-0">
-                        @else
-                            {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$game->type] ?? '🃏' }}
-                        @endif
-                        <span class="absolute top-3 left-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">مجاني</span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="text-lg font-bold mb-2">{{ $game->name }}</h3>
-                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">{{ $game->description }}</p>
-                        <div class="flex gap-2">
-                            <a href="{{ route('games.play', $game->slug) }}"
-                               class="flex-1 text-center bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
-                                العب الآن 🎮
-                            </a>
-                            <a href="{{ route('games.show', $game->slug) }}"
-                               class="px-4 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white py-2.5 rounded-xl text-sm transition-colors">
-                                طريقة اللعب
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </section>
-    @endif
-
-    <!-- Paid Games -->
-    @if($paidGames->isNotEmpty())
-    <section id="premium-games" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-1.5 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
-            <h2 class="text-2xl font-black">الألعاب المميزة</h2>
-            <span class="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-500/30">⭐ مدفوع</span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($paidGames as $game)
-                <div class="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-yellow-500/50 transition-all hover:transform hover:-translate-y-1 relative">
-                    <!-- Premium badge -->
-                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-l from-yellow-400 to-orange-500"></div>
-
-                    <div class="h-48 bg-gradient-to-br from-yellow-900/30 to-orange-900/30 flex items-center justify-center text-6xl relative">
-                        @if($game->image)
-                            <img src="{{ $game->image_url }}" alt="{{ $game->name }}" class="w-full h-full object-cover absolute inset-0">
-                        @else
-                            {{ ['snakes' => '🐍', 'control' => '👑', 'spinner' => '🎡'][$game->type] ?? '🃏' }}
-                        @endif
-                        <span class="absolute top-3 left-3 bg-gradient-to-l from-yellow-500 to-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                            {{ number_format($game->price, 0) }} 
-                        </span>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="text-lg font-bold mb-2">{{ $game->name }}</h3>
-                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">{{ $game->description }}</p>
-                        <div class="flex gap-2">
-                            @auth
-                                @if(auth()->user()->hasActiveSubscription($game->id))
-                                    <a href="{{ route('games.play', $game->slug) }}"
-                                       class="flex-1 text-center bg-gradient-to-l from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white py-2.5 rounded-xl text-sm font-bold transition-all">
-                                        العب الآن 🎮
-                                    </a>
-                                @else
-                                    <a href="{{ route('subscribe.create', $game->id) }}"
-                                       class="flex-1 text-center bg-gradient-to-l from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white py-2.5 rounded-xl text-sm font-bold transition-all">
-                                        اشترك الآن ⭐
-                                    </a>
-                                @endif
-                            @else
-                                <a href="{{ route('subscribe.create', $game->id) }}"
-                                   class="flex-1 text-center bg-gradient-to-l from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white py-2.5 rounded-xl text-sm font-bold transition-all">
-                                    اشترك الآن ⭐
-                                </a>
-                            @endauth
-                            <a href="{{ route('games.show', $game->slug) }}"
-                               class="px-4 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white py-2.5 rounded-xl text-sm transition-colors">
-                                طريقة اللعب
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </section>
-    @endif
-
-    @include('home.reviews')
-
-    <!-- How it works -->
-    <section class="bg-gray-900/50 border-y border-gray-800 py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-black mb-12">كيف تبدأ؟</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach([
-                    ['icon' => '1️⃣', 'title' => 'أنشئ حسابك',    'desc' => 'سجّل حساباً مجانياً في ثوانٍ'],
-                    ['icon' => '2️⃣', 'title' => 'اختر لعبتك',     'desc' => 'تصفّح الألعاب المتاحة واختر ما يناسبك'],
-                    ['icon' => '3️⃣', 'title' => 'ابدأ الاستمتاع', 'desc' => 'العب مع شريكك وعش لحظات لا تُنسى'],
-                ] as $step)
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">{{ $step['icon'] }}</div>
-                        <h3 class="text-xl font-bold mb-2">{{ $step['title'] }}</h3>
-                        <p class="text-gray-400">{{ $step['desc'] }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
+<x-slot name="title">{{ \App\Models\Setting::get('site_name', 'Funny Couples') }} — سهرة مختلفة ليكم أنتم الاتنين</x-slot>
+@php
+    $games = $freeGames->concat($paidGames)->sortBy('sort_order');
+    $bundlePrice = \App\Support\Membership::price();
+@endphp
+<div class="discover-page">
+<section class="discover-hero discover-wrap">
+    <div class="hero-copy"><span class="discover-eyebrow">وقت ليكم. حكايات بينكم.</span><h1>لسّه في حاجات<br>حلوة <em>تكتشفوها.</em></h1><p>اقفلوا زحمة اليوم وافتحوا باب للضحك والتحديات.<br>ألعاب لشخصين… وكل لعبة بداية لسهرة مختلفة.</p><div class="discover-actions"><a class="discover-button" href="#games">اكتشف ألعابكم <span>↙</span></a><a class="discover-link" href="#plans">شوف الاشتراكات ←</a></div><div class="hero-facts"><span>♡ لشخصين</span><span>◈ من المتصفح</span><span>✦ محتوى للمشتركين</span></div></div>
+    <div class="hero-art"><img src="{{ asset('images/home/date-night-hero.png') }}" alt="كروت غامضة ونرد وقلب زجاجي لأجواء سهرة ألعاب" width="1536" height="1024" fetchpriority="high"><div class="art-caption"><span>THE NEXT CARD IS YOURS</span><strong>يا ترى الكارت الجاي مخبّي إيه؟</strong></div></div>
+</section>
+<section class="mood-strip discover-wrap" x-data="{ mood: 'الكل' }" id="games">
+    <div class="section-intro"><div><span class="discover-eyebrow">اختاروا بداية الحكاية</span><h2>مودكم إيه النهارده؟</h2></div><p>شوفوا الفكرة وطريقة اللعب، وافتحوا التجربة بالاشتراك.</p></div>
+    <div class="mood-options" role="group" aria-label="اختار نوع التجربة">@foreach(['الكل' => 'كل الألعاب', 'ضحك' => 'نضحك سوا', 'تعارف' => 'نعرف بعض أكتر', 'تحدي' => 'ندخل تحدي', 'مفاجأة' => 'نفاجئ بعض'] as $value => $label)<button type="button" @click="mood = '{{ $value }}'" :aria-pressed="mood === '{{ $value }}'" :class="{ 'selected': mood === '{{ $value }}' }">{{ $label }}</button>@endforeach</div>
+    <div class="discover-grid">
+    @forelse($games as $game)
+        @php($teaser = \App\Support\Membership::teaser($game->type))
+        @php($unlocked = auth()->user()?->hasActiveSubscription($game->id))
+        <article class="discover-card" x-show="mood === 'الكل' || mood === '{{ $teaser[1] }}'">
+            <a href="{{ route('games.show', $game->slug) }}" class="game-cover cover-{{ $game->type }}" aria-label="اكتشف {{ $game->name }}">
+                @if($game->image)<img src="{{ $game->image_url }}" alt="{{ $game->name }}" loading="lazy">@else<span class="cover-symbol" aria-hidden="true">{{ $teaser[0] }}</span>@endif
+                <span class="access-pill">{{ $unlocked ? '✓ متاحة ليك' : '♧ للمشتركين' }}</span><span class="cover-category">{{ $teaser[1] }}</span>
+            </a>
+            <div class="discover-card-body"><h3>{{ $game->name }}</h3><p>{{ $teaser[2] }}</p><div class="card-bottom"><span>{{ !$game->is_free && $game->price > 0 ? number_format($game->price, 0).' ج.م' : 'ضمن باقة كل الألعاب' }}</span><a href="{{ $unlocked ? route('games.play', $game->slug) : route('games.show', $game->slug) }}">{{ $unlocked ? 'ابدأ اللعب' : 'خد لمحة' }} ←</a></div></div>
+        </article>
+    @empty<p class="membership-note">بنجهّز لكم ألعابنا. ارجعوا قريب واكتشفوا الجديد.</p>@endforelse
+    </div>
+    @foreach(['ضحك', 'تعارف', 'تحدي', 'مفاجأة'] as $mood)
+        @if(!$games->contains(fn ($game) => \App\Support\Membership::teaser($game->type)[1] === $mood))<p x-cloak x-show="mood === '{{ $mood }}'" class="membership-note">لسّه مفيش ألعاب في المود ده. اختاروا مود تاني من فوق.</p>@endif
+    @endforeach
+</section>
+<section class="discover-wrap preview-band"><div><span class="discover-eyebrow">الفضول أول خطوة</span><h2>ورا كل كارت،<br>لحظة تخصّكم.</h2><p>أسئلة تفتح كلام، اختيارات غير متوقعة، وتحديات على مزاجكم. شوفوا فكرة كل لعبة قبل الاشتراك، وسيبوا مفاجآتها لوقت اللعب.</p><a class="discover-link" href="#plans">جاهزين تفتحوا الكروت؟ ←</a></div><div class="mystery-deck" aria-hidden="true"><div>♡</div><div>؟<small>الحكاية لسه بتبدأ</small></div><div>✦</div></div></section>
+<section class="discover-wrap" id="plans"><div class="section-intro"><div><span class="discover-eyebrow">اختيار واحد… وسهرة على مزاجكم</span><h2>افتحوا باب اللعب.</h2></div><p>دفعة واحدة • بدون تجديد تلقائي</p></div><div class="plans-grid {{ $paidGames->where('price', '>', 0)->isEmpty() ? 'bundle-only' : '' }}">@if($paidGames->where('price', '>', 0)->isNotEmpty())<article class="plan-card"><span class="discover-eyebrow">ابدأوا بلعبة</span><h3>لعبتكم المفضلة</h3><p>اختاروا اللعبة اللي شدّت فضولكم، وافتحوا محتواها كاملًا.</p><ul><li>وصول للعبة المختارة بعد الموافقة</li><li>الأسئلة والتحديات الخاصة بيها</li><li>اشتراك جديد بلا تاريخ انتهاء</li></ul><a class="discover-button secondary" href="#games">اختار لعبتك ←</a></article>@endif<article class="plan-card featured"><span class="plan-badge">كل المودات في مكان واحد</span><span class="discover-eyebrow">باقة كل الألعاب</span><h3>كل مرة، حكاية.</h3><p>كل الألعاب المتاحة بحساب واحد. بدّلوا بين التجارب على مزاجكم.</p>@if($games->isNotEmpty() && $bundlePrice > 0)<div class="plan-price">{{ number_format($bundlePrice, 0) }} <small>ج.م / دفعة واحدة</small></div><ul><li>{{ $games->count() }} ألعاب متاحة حاليًا</li><li>وصول كامل بعد الموافقة على الدفع</li><li>بلا تاريخ انتهاء أو تجديد تلقائي</li></ul><a class="discover-button" href="{{ route('subscribe.bundle') }}">افتح كل الألعاب ←</a>@else<p>الباقة هتكون متاحة قريب.</p>@endif</article></div><p class="plan-footnote">الدفع بفودافون كاش ورفع الإيصال. التفعيل بعد المراجعة والموافقة؛ تابع طلبك من ملفك الشخصي.</p></section>
+@php($homeSettings['notifications_enabled'] = false)
+@include('home.reviews')
+<section class="discover-wrap faq-section"><div><span class="discover-eyebrow">قبل ما تبدأوا</span><h2>يمكن بتفكروا في…</h2></div><div>@foreach([
+'هل لازم اشترك علشان ألعب؟' => 'أيوه. تقدر تشوف الألعاب وطريقة اللعب مجانًا، لكن الأسئلة والتحديات واللعب متاحة بعد تفعيل اشتراكك. إنشاء الحساب لوحده مش بيفتح الألعاب.',
+'هل محتاجين نحمل تطبيق؟' => 'لأ، الألعاب بتفتح من المتصفح على الموبايل أو الكمبيوتر. تقدروا تلعبوا سوا على نفس الجهاز.',
+'إيه الفرق بين اللعبة والباقة؟' => 'الاشتراك الفردي بيفتح اللعبة اللي اخترتها. باقة كل الألعاب بتفتح كل الألعاب المتاحة على المنصة.',
+'إمتى الاشتراك بيتفعّل؟' => 'بعد تحويل المبلغ ورفع الإيصال، بنراجع طلبك وبنفعّله بعد الموافقة. حالة الطلب بتظهر في ملفك الشخصي، والتفعيل مش فوري.',
+'ولو سؤال أو تحدي مش مناسب لينا؟' => 'اختاروا اللي يريحكم أنتم الاتنين، وتخطّوا أي سؤال أو مهمة من غير تبرير. التجربة على مزاجكم.'
+] as $question => $answer)<details><summary>{{ $question }}</summary><p>{{ $answer }}</p></details>@endforeach</div></section>
+<section class="discover-wrap final-invite"><span class="discover-eyebrow">سيبوا الروتين برّه</span><h2>سهرتكم الجاية… تبدأ بكارت.</h2><a class="discover-button" href="#plans">اختار اشتراكك ←</a></section>
+</div>
 </x-app-layout>
-<style>
-    .h-48 {
-    height: 22rem !important;
-}
-</style>

@@ -23,7 +23,7 @@
                 <label class="block text-sm font-medium text-gray-300 mb-2">الصورة</label>
                 @if($challengeCard->image)
                     <div class="mb-3 flex items-center gap-4">
-                        <img src="{{ asset('storage/' . $challengeCard->image) }}"
+                        <img src="{{ $challengeCard->image_url }}"
                              id="previewImg"
                              class="w-24 h-24 rounded-xl object-cover border border-gray-700">
                         <p class="text-xs text-gray-400">الصورة الحالية<br><span class="text-gray-600">ارفع صورة جديدة لاستبدالها</span></p>

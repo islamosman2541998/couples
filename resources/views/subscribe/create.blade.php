@@ -4,16 +4,17 @@
         $checkoutData = [
             'user' => auth()->user()?->only(['name', 'email', 'phone']),
             'gameId' => $game->id,
-            'games' => $paidGames->map(fn ($item) => $item->only(['id', 'name', 'price']))->values(),
+            'games' => $paidGames->map(fn ($item) => (array) $item)->values(),
         ];
     @endphp
     <div class="checkout-page max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14" x-data="checkout({{ \Illuminate\Support\Js::from($checkoutData) }})">
         <div class="text-center mb-8">
-            <span class="inline-block rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 text-sm text-purple-300 mb-4">خطوتين… وتبدأ الحكاية ♡</span>
+            <span class="inline-block rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 text-sm text-purple-300 mb-4">سهرتكم الجاية تبدأ هنا ♡</span>
             <h1 class="text-2xl sm:text-3xl font-black mb-3">الاشتراك في <span x-text="currentGame?.name">{{ $game->name }}</span></h1>
             <p class="text-gray-400 text-sm">سجّل بياناتك، حوّل المبلغ وارفع الإيصال من نفس الصفحة.</p>
         </div>
 
+        <div class="membership-note mb-6"><strong>اشتراك واضح، ومفاجآت جوّه الألعاب.</strong><p>باقة كل الألعاب تفتح جميع الألعاب المتاحة، والاشتراك الفردي يفتح اللعبة المختارة فقط. دفعة واحدة دون تجديد تلقائي؛ الاشتراكات الجديدة بلا تاريخ انتهاء. يبدأ الوصول بعد مراجعة الإيصال والموافقة، وليس فور التحويل. تابع حالة طلبك من ملفك الشخصي.</p></div>
         <div x-show="!success">
             <section class="checkout-card mb-6" aria-labelledby="checkout-account-heading">
                 <div class="flex items-center gap-3 mb-5"><span class="checkout-step">1</span><div><h2 id="checkout-account-heading" class="font-bold text-lg">حسابك أولاً</h2><p class="text-gray-400 text-xs mt-1">علشان تلاقي لعبتك واشتراكك في مكان واحد</p></div></div>
@@ -54,12 +55,12 @@
 
             <section x-ref="payment" class="checkout-card scroll-mt-24" aria-labelledby="checkout-payment-heading">
                 <div class="flex items-center gap-3 mb-5"><span class="checkout-step">2</span><div><h2 id="checkout-payment-heading" class="font-bold text-lg">الدفع وتأكيد الاشتراك</h2><p class="text-gray-400 text-xs mt-1">حوّل المبلغ ثم ارفع صورة الإيصال للمراجعة</p></div></div>
-                <label class="checkout-label mb-5">اللعبة المراد الاشتراك فيها<select class="checkout-input" x-model="selectedGame" :disabled="paymentBusy">@foreach($paidGames as $item)<option value="{{ $item->id }}" @selected($item->id === $game->id)>{{ $item->name }} — {{ number_format($item->price, 2) }}</option>@endforeach</select></label>
+                <label class="checkout-label mb-5">اختار اشتراكك<select class="checkout-input" x-model="selectedGame" :disabled="paymentBusy">@foreach($paidGames as $item)<option value="{{ $item->id }}" @selected($item->id === $game->id)>{{ $item->name }} — {{ number_format($item->price, 2) }} ج.م</option>@endforeach</select></label>
                 <div class="rounded-xl bg-blue-900/20 border border-blue-500/25 p-5 mb-6">
                     <h3 class="text-blue-300 font-bold mb-3">بيانات التحويل · فودافون كاش</h3>
                     <p class="text-gray-400 text-xs mb-2">رقم التحويل</p>
                     <p class="font-mono text-lg font-bold break-all bg-gray-950/50 rounded-lg px-3 py-2" dir="ltr">{{ \App\Models\Setting::get('bank_account', '') }}</p>
-                    <div class="flex items-center justify-between gap-4 mt-4"><span class="text-sm text-gray-300">المبلغ المطلوب</span><strong class="text-2xl text-yellow-300" x-text="amount">{{ number_format($game->price, 2) }}</strong></div>
+                    <div class="flex items-center justify-between gap-4 mt-4"><span class="text-sm text-gray-300">المبلغ المطلوب بالجنيه المصري</span><strong class="text-2xl text-yellow-300" x-text="amount">{{ number_format($game->price, 2) }}</strong></div>
                 </div>
                 <p x-show="!user" class="text-amber-300 text-sm mb-4">أنشئ حساباً أو سجّل الدخول بالأعلى لتكمل إرسال الإيصال.</p>
                 <div x-show="paymentErrors.length" x-cloak class="checkout-error" role="alert"><template x-for="(error, index) in paymentErrors" :key="index"><p x-text="error"></p></template></div>

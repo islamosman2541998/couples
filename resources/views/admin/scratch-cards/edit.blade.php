@@ -33,7 +33,7 @@
                 <label class="block text-sm font-medium text-gray-300 mb-2">الصورة</label>
                 @if($scratchCard->image)
                     <div class="mb-3 flex items-center gap-3">
-                        <img src="{{ asset('storage/' . $scratchCard->image) }}" class="w-20 h-20 rounded-xl object-cover border border-gray-700">
+                        <img src="{{ $scratchCard->image_url }}" class="w-20 h-20 rounded-xl object-cover border border-gray-700">
                         <p class="text-xs text-gray-400">الصورة الحالية</p>
                     </div>
                 @endif

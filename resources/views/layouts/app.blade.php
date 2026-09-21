@@ -53,7 +53,7 @@
                         </div>
                     @else
                         <a x-show="!checkoutUser" href="{{ route('login') }}" class="text-gray-300 hover:text-white text-xs sm:text-sm whitespace-nowrap"><span class="sm:hidden">دخول</span><span class="hidden sm:inline">تسجيل الدخول</span></a>
-                        <a x-show="!checkoutUser" href="{{ route('register') }}" class="bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl font-medium transition-all whitespace-nowrap">إنشاء حساب</a>
+                        <a x-show="!checkoutUser" href="{{ route('home') }}#plans" class="bg-gradient-to-l from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl font-medium transition-all whitespace-nowrap">اشترك والعب</a>
                         <a x-show="checkoutUser" x-cloak href="{{ route('profile.index') }}" class="text-purple-300 text-sm font-bold">ملفي الشخصي ✓</a>
                     @endauth
                 </div>

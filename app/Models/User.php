@@ -43,8 +43,9 @@ class User extends Authenticatable
 
     public function hasActiveSubscription(int $gameId): bool
     {
+        if (! $this->is_active) return false;
         return $this->subscriptions()
-            ->where('game_id', $gameId)
+            ->where(fn ($q) => $q->where('game_id', $gameId)->orWhere('is_bundle', true))
             ->where('status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('expires_at')->orWhere('expires_at', '>', now());

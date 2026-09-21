@@ -33,7 +33,7 @@
                             </td>
                             <td class="p-4">
                                 @if($card->image)
-                                    <img src="{{ asset('storage/' . $card->image) }}" class="w-12 h-12 rounded-lg object-cover border border-gray-700">
+                                    <img src="{{ $card->image_url }}" class="w-12 h-12 rounded-lg object-cover border border-gray-700">
                                 @else
                                     <div class="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center text-gray-600 text-xs">لا يوجد</div>
                                 @endif

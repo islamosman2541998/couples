@@ -19,7 +19,7 @@ class GameController extends Controller
     {
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        return view('games.show', compact('game'));
+        return response()->view('games.show', compact('game'))->header('Cache-Control', 'private, no-store');
     }
 
     public function scratchCard(string $slug, int $number): JsonResponse
@@ -27,9 +27,7 @@ class GameController extends Controller
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
         abort_unless($game->type === 'scratch', 404);
 
-        if (! $game->is_free) {
-            abort_unless(auth()->check() && auth()->user()->hasActiveSubscription($game->id), 403);
-        }
+        abort_unless(auth()->user()?->hasActiveSubscription($game->id) ?? false, 403);
 
         $card = ScratchCard::active()->where('number', $number)->firstOrFail();
 
@@ -42,12 +40,9 @@ class GameController extends Controller
     {
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        // Check if paid game requires subscription
-        if (! $game->is_free) {
-            if (! auth()->check() || ! auth()->user()->hasActiveSubscription($game->id)) {
-                return redirect()->route('subscribe.create', $game->id)
-                    ->with('warning', 'هذه اللعبة تتطلب اشتراكاً مدفوعاً');
-            }
+        if (! (auth()->user()?->hasActiveSubscription($game->id) ?? false)) {
+            return redirect()->route('subscribe.create', $game->id)
+                ->with('warning', 'هذه اللعبة تتطلب اشتراكاً مدفوعاً');
         }
 
         if ($game->type === 'card') {
@@ -55,7 +50,7 @@ class GameController extends Controller
                 ->orderBy('sort_order')
                 ->get();
 
-            return view('games.card-game', compact('game', 'levels'));
+            return response()->view('games.card-game', compact('game', 'levels'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'control') {
@@ -64,10 +59,10 @@ class GameController extends Controller
                     'id' => $card->id,
                     'title' => $card->title,
                     'description' => $card->description,
-                    'image' => $card->image ? asset('storage/'.$card->image) : null,
+                    'image' => $card->image ? $card->image_url : null,
                 ])->values()->toArray();
 
-            return view('games.control-game', compact('game', 'cards'));
+            return response()->view('games.control-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'snakes') {
@@ -86,7 +81,7 @@ class GameController extends Controller
             })->all();
             $boardLinks = config('snakes.links');
 
-            return view('games.snakes-game', compact('game', 'cells', 'boardLinks'));
+            return response()->view('games.snakes-game', compact('game', 'cells', 'boardLinks'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'spinner') {
@@ -96,11 +91,11 @@ class GameController extends Controller
                     'id' => $img->id,
                     'name' => $img->name,
                     'color' => $img->color,
-                    'image' => $img->image !== 'spinner/placeholder.png' ? asset('storage/'.$img->image) : null,
+                    'image' => $img->image !== 'spinner/placeholder.png' ? $img->image_url : null,
                 ];
             })->values()->toArray();
 
-            return view('games.spinner-game', compact('game', 'images', 'spinnerData'));
+            return response()->view('games.spinner-game', compact('game', 'images', 'spinnerData'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'scratch') {
@@ -112,7 +107,7 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return view('games.scratch-game', compact('game', 'cards'));
+            return response()->view('games.scratch-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'who') {
@@ -130,7 +125,7 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return view('games.who-game', compact('game', 'questions'));
+            return response()->view('games.who-game', compact('game', 'questions'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'challenge') {
@@ -141,7 +136,7 @@ class GameController extends Controller
                     'id' => $c->id,
                     'title' => $c->title,
                     'description' => $c->description,
-                    'image' => $c->image ? asset('storage/'.$c->image) : null,
+                    'image' => $c->image ? $c->image_url : null,
                     'timer' => $c->timer,
                     'category' => $c->category,
                     'category_emoji' => $c->category_emoji,
@@ -151,7 +146,7 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return view('games.challenge-game', compact('game', 'cards'));
+            return response()->view('games.challenge-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'know_me') {
@@ -172,7 +167,7 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return view('games.know-me-game', compact('game', 'questions'));
+            return response()->view('games.know-me-game', compact('game', 'questions'))->header('Cache-Control', 'private, no-store');
         }
 
         abort(404);
@@ -185,7 +180,7 @@ class GameController extends Controller
             'level' => $card->level,
             'content' => $card->content,
             'image' => $card->image
-                ? asset('storage/'.$card->image).'?v='.$card->updated_at->timestamp
+                ? $card->image_url.'?v='.$card->updated_at->timestamp
                 : null,
         ];
     }

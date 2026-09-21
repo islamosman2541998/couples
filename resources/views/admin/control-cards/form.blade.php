@@ -19,7 +19,7 @@
                 <input id="image" type="file" name="image" accept="image/*" class="w-full text-gray-300">
                 @error('image')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                 @if($card->image)
-                    <img src="{{ asset('storage/'.$card->image) }}" alt="صورة الكارت الحالية" class="max-h-40 rounded-xl mt-3">
+                    <img src="{{ $card->image_url }}" alt="صورة الكارت الحالية" class="max-h-40 rounded-xl mt-3">
                     <label class="block mt-3"><input type="checkbox" name="remove_image" value="1" @checked(old('remove_image'))> إزالة الصورة الحالية</label>
                 @endif
             </div>

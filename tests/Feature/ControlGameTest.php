@@ -34,6 +34,7 @@ class ControlGameTest extends TestCase
 
     public function test_game_is_listed_and_only_active_cards_are_passed_to_the_player(): void
     {
+        $this->signInMember();
         $this->seed(ControlGameSeeder::class);
         $card = ControlCard::firstOrFail();
         $card->update(['is_active' => false]);
@@ -47,7 +48,7 @@ class ControlGameTest extends TestCase
 
     public function test_admin_can_manage_cards_images_and_activation(): void
     {
-        Storage::fake('public');
+        Storage::fake('premium');
         $this->actingAs(User::factory()->create(['is_admin' => true]));
         $this->get('/admin/control-cards/create')->assertOk();
         $data = ['title' => 'A card', 'description' => 'A challenge', 'sort_order' => 1, 'is_active' => 1];
@@ -55,14 +56,14 @@ class ControlGameTest extends TestCase
             ->assertSessionHasNoErrors()->assertRedirect(route('admin.control-cards.index'));
         $card = ControlCard::firstOrFail();
         $image = $card->image;
-        Storage::disk('public')->assertExists($image);
+        Storage::disk('premium')->assertExists($image);
         $this->get('/admin/control-cards')->assertOk()->assertSee('A card');
         $this->get('/admin/control-cards/'.$card->id.'/edit')->assertOk();
         $this->put('/admin/control-cards/'.$card->id, [...$data, 'is_active' => 0, 'remove_image' => 1])
             ->assertSessionHasNoErrors();
         $this->assertFalse($card->fresh()->is_active);
         $this->assertNull($card->fresh()->image);
-        Storage::disk('public')->assertMissing($image);
+        Storage::disk('premium')->assertMissing($image);
         $this->delete('/admin/control-cards/'.$card->id)->assertRedirect();
         $this->assertDatabaseCount('control_cards', 0);
     }

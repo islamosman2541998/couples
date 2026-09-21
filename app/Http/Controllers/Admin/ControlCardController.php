@@ -39,7 +39,7 @@ class ControlCardController extends Controller
         $data = $this->validatedData($request);
         $controlCard->update($data);
         if ($oldImage && array_key_exists('image', $data) && $oldImage !== $data['image']) {
-            Storage::disk('public')->delete($oldImage);
+            Storage::disk('premium')->delete($oldImage);
         }
 
         return redirect()->route('admin.control-cards.index')->with('success', 'تم تحديث كارت السيطرة');
@@ -50,7 +50,7 @@ class ControlCardController extends Controller
         $image = $controlCard->image;
         $controlCard->delete();
         if ($image) {
-            Storage::disk('public')->delete($image);
+            Storage::disk('premium')->delete($image);
         }
 
         return redirect()->route('admin.control-cards.index')->with('success', 'تم حذف كارت السيطرة');
@@ -71,7 +71,7 @@ class ControlCardController extends Controller
             $data['image'] = null;
         }
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('control-cards', 'public');
+            $data['image'] = $request->file('image')->store('control-cards', 'premium');
         }
 
         return $data;

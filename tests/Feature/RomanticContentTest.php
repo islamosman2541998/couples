@@ -45,6 +45,7 @@ class RomanticContentTest extends TestCase
 
     public function test_new_collection_renders_in_all_six_games(): void
     {
+        $this->signInMember();
         $this->seed(RomanticContentSeeder::class);
         foreach (['card', 'spinner', 'scratch', 'who', 'challenge', 'know_me'] as $type) {
             $game = Game::create(['name' => $type, 'slug' => $type, 'type' => $type, 'is_free' => true]);

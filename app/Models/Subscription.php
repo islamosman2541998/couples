@@ -11,12 +11,14 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id', 'game_id', 'full_name', 'phone', 'email',
-        'receipt_image', 'status', 'admin_notes', 'approved_at', 'expires_at',
+        'receipt_image', 'status', 'admin_notes', 'approved_at', 'expires_at', 'is_bundle', 'amount',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_bundle' => 'boolean',
+            'amount' => 'decimal:2',
             'approved_at' => 'datetime',
             'expires_at'  => 'datetime',
         ];
@@ -25,6 +27,11 @@ class Subscription extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getProductNameAttribute(): string
+    {
+        return $this->is_bundle ? 'باقة كل الألعاب' : ($this->game?->name ?? 'لعبة غير متاحة');
     }
 
     public function game()

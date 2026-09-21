@@ -24,6 +24,8 @@
             <!-- General Settings -->
             <div x-show="tab === 'general'" class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-5">
                 <h2 class="font-bold text-lg border-b border-gray-800 pb-4">الإعدادات العامة</h2>
+                <label class="block">سعر باقة كل الألعاب (ج.م)<input class="checkout-input" type="number" min="1" max="999999" step="0.01" name="membership_price" value="{{ old('membership_price', $settings['membership_price'] ?? '') }}"><span class="block text-gray-400 text-sm mt-2">اتركه فارغًا لاستخدام مجموع أسعار الألعاب المدفوعة. الباقة تفتح جميع الألعاب؛ دفعة واحدة بلا انتهاء أو تجديد تلقائي.</span></label>
+                @error('membership_price')<p class="text-red-400">{{ $message }}</p>@enderror
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">اسم الموقع</label>
                     <input type="text" name="site_name" value="{{ $settings['site_name'] ?? '' }}"

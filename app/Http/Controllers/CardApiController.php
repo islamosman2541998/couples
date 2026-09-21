@@ -16,7 +16,7 @@ class CardApiController extends Controller
             'target' => ['sometimes', 'in:all,both,male,female'],
         ]);
         $game = Game::active()->where('type', 'card')->findOrFail($request->integer('game_id'));
-        abort_unless($game->is_free || ($request->user()?->hasActiveSubscription($game->id) ?? false), 403);
+        abort_unless($request->user()?->hasActiveSubscription($game->id) ?? false, 403);
 
         $level = CardLevel::where('slug', $levelSlug)->firstOrFail();
 
@@ -32,6 +32,6 @@ class CardApiController extends Controller
             ->inRandomOrder()
             ->get(['id', 'content', 'target']);
 
-        return response()->json($cards);
+        return response()->json($cards)->header('Cache-Control', 'private, no-store');
     }
 }

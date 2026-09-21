@@ -46,6 +46,7 @@ class GameTypeFormTest extends TestCase
         $this->assertSame($type, $game->fresh()->type);
         $this->assertSame("First step\nSecond step", $game->fresh()->how_to_play);
         $views = ['card' => 'card-game', 'spinner' => 'spinner-game', 'scratch' => 'scratch-game', 'who' => 'who-game', 'challenge' => 'challenge-game', 'know_me' => 'know-me-game', 'control' => 'control-game', 'snakes' => 'snakes-game'];
+        $this->signInMember(auth()->user());
         $this->get('/games/'.$game->slug.'/play')->assertOk()->assertViewIs('games.'.$views[$type]);
         $this->get('/games/'.$game->slug)
             ->assertOk()

@@ -30,7 +30,7 @@
                 @foreach($user->subscriptions as $sub)
                     <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
                         <div>
-                            <div class="font-medium text-sm">{{ $sub->game->name }}</div>
+                            <div class="font-medium text-sm">{{ $sub->product_name }}</div>
                             <div class="text-xs text-gray-500">{{ $sub->created_at->format('Y/m/d') }}</div>
                         </div>
                         <span class="px-2 py-1 text-xs rounded-full

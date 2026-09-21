@@ -19,9 +19,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                @if($subscription->amount !== null)<div><span class="text-gray-500">المبلغ المطلوب عند الطلب:</span><div class="text-white font-medium mt-1">{{ number_format($subscription->amount, 2) }} ج.م</div></div>@endif
                 <div>
-                    <span class="text-gray-500">اللعبة:</span>
-                    <div class="text-white font-medium mt-1">{{ $subscription->game->name }}</div>
+                    <span class="text-gray-500">الاشتراك:</span>
+                    <div class="text-white font-medium mt-1">{{ $subscription->product_name }}</div>
                 </div>
                 <div>
                     <span class="text-gray-500">تاريخ الطلب:</span>

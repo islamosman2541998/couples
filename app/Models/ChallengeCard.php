@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChallengeCard extends Model
 {
+    public function getImageUrlAttribute(): string
+    {
+        return route('games.media', ['type' => 'challenge', 'id' => $this->id]);
+    }
+
     protected $fillable = ['title', 'description', 'image', 'timer', 'category', 'is_active', 'sort_order'];
 
     protected $casts = ['is_active' => 'boolean', 'timer' => 'integer'];
