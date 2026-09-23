@@ -76,6 +76,9 @@ class VisitorAnalyticsTest extends TestCase
         $this->get('/admin/visitors')->assertRedirect('/login');
         $this->actingAs(User::factory()->create())->get('/admin/visitors/'.$visitor->id)->assertForbidden();
         $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $this->get('/admin')->assertOk()
+            ->assertSee('الزوار والإحصائيات')
+            ->assertSee('href="'.route('admin.visitors.index').'"', false);
         $response = $this->get('/admin/visitors?source=facebook&device=Mobile')->assertOk()->assertSee('facebook');
         $response->assertViewHas('stats', fn ($stats) => $stats['visitors'] === 1 && $stats['views'] === 1);
         $this->get('/admin/visitors?source=missing')->assertOk()->assertViewHas('stats', fn ($stats) => $stats['visitors'] === 0);

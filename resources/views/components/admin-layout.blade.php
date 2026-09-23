@@ -45,6 +45,7 @@
             @php
                 $navItems = [
                     ['route' => 'admin.dashboard',            'label' => 'لوحة التحكم',     'icon' => '📊'],
+                    ['route' => 'admin.visitors.index',       'label' => 'الزوار والإحصائيات', 'description' => 'مصادر الزيارات ورحلة كل زائر', 'icon' => '👣'],
                     ['route' => 'admin.games.index',          'label' => 'بيانات الألعاب',  'description' => 'الاسم والصورة والوصف وطريقة اللعب', 'icon' => '🎮'],
                     ['route' => 'admin.cards.index',          'label' => 'لعبة الكروت',      'description' => 'الكروت والأحكام', 'icon' => '🃏'],
                     ['route' => 'admin.card-levels.index',    'label' => 'لعبة الكروت',      'description' => 'المستويات', 'icon' => '📈'],
