@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GameManageController;
 use App\Http\Controllers\Admin\KnowMeController;
 use App\Http\Controllers\Admin\ScratchCardController;
-use App\Http\Controllers\Admin\SnakeCellController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SnakeCellController;
 use App\Http\Controllers\Admin\SpinnerController;
 use App\Http\Controllers\Admin\SubscriptionManageController;
 use App\Http\Controllers\Admin\UserController;
@@ -35,6 +35,9 @@ Route::post('/checkout/login', [\App\Http\Controllers\CheckoutAuthController::cl
 Route::get('/subscribe/{gameId}', [SubscriptionController::class, 'create'])->whereNumber('gameId')->name('subscribe.create');
 Route::post('/subscribe', [SubscriptionController::class, 'store'])->middleware('auth')->name('subscribe.store');
 
+Route::post('/analytics/preference', [\App\Http\Controllers\AnalyticsEventController::class, 'preference'])->middleware('throttle:10,1')->name('analytics.preference');
+Route::post('/analytics/events', [\App\Http\Controllers\AnalyticsEventController::class, 'store'])->middleware('throttle:120,1')->name('analytics.events');
+
 // Static pages
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
@@ -51,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
 // ==================== Admin ====================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('visitors', [\App\Http\Controllers\Admin\VisitorController::class, 'index'])->name('visitors.index');
+    Route::get('visitors/{visitor}', [\App\Http\Controllers\Admin\VisitorController::class, 'show'])->name('visitors.show');
 
     // Games
     Route::post('games/install-new', [GameManageController::class, 'installNew'])->name('games.install-new');

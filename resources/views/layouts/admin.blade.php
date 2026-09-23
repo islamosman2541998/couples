@@ -43,6 +43,7 @@
             <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 @php
                     $nav = [
+                        ['route' => 'admin.visitors.index', 'label' => 'الزوار والإحصائيات', 'icon' => '👣'],
                         ['route' => 'admin.dashboard',          'label' => 'لوحة التحكم',    'icon' => '📊'],
                         ['route' => 'admin.games.index',        'label' => 'الألعاب',          'icon' => '🎮'],
                         ['route' => 'admin.cards.index',        'label' => 'كروت الأحكام',    'icon' => '🃏'],

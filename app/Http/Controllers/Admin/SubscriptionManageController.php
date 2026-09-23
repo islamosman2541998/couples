@@ -23,8 +23,8 @@ class SubscriptionManageController extends Controller
         $subscriptions = $query->paginate(20);
 
         $stats = [
-            'total'    => Subscription::count(),
-            'pending'  => Subscription::where('status', 'pending')->count(),
+            'total' => Subscription::count(),
+            'pending' => Subscription::where('status', 'pending')->count(),
             'approved' => Subscription::where('status', 'approved')->count(),
             'rejected' => Subscription::where('status', 'rejected')->count(),
         ];
@@ -35,31 +35,45 @@ class SubscriptionManageController extends Controller
     public function show(Subscription $subscription)
     {
         $subscription->load(['user', 'game']);
+
         return view('admin.subscriptions.show', compact('subscription'));
     }
 
     public function receipt(Subscription $subscription)
     {
         abort_unless(Storage::disk('local')->exists($subscription->receipt_image), 404);
+
         return Storage::disk('local')->response($subscription->receipt_image, null, ['Cache-Control' => 'private, no-store']);
     }
 
     public function approve(Request $request, Subscription $subscription)
     {
         $subscription->update([
-            'status'      => 'approved',
+            'status' => 'approved',
             'approved_at' => now(),
             'admin_notes' => $request->admin_notes,
         ]);
+        try {
+            if ($subscription->analytics_visit_id) {
+                \App\Models\AnalyticsEvent::firstOrCreate([
+                    'visit_id' => $subscription->analytics_visit_id,
+                    'name' => 'subscription_approved', 'detail' => (string) $subscription->id,
+                ], ['path' => '/subscribe', 'created_at' => now()]);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return back()->with('success', 'تم قبول الاشتراك بنجاح');
     }
 
     public function reject(Request $request, Subscription $subscription)
     {
         $subscription->update([
-            'status'      => 'rejected',
+            'status' => 'rejected',
             'admin_notes' => $request->admin_notes,
         ]);
+
         return back()->with('success', 'تم رفض الاشتراك');
     }
 }

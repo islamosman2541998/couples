@@ -11,7 +11,7 @@
 </section>
 <section class="mood-strip discover-wrap" x-data="{ mood: 'الكل' }" id="games">
     <div class="section-intro"><div><span class="discover-eyebrow">اختاروا بداية الحكاية</span><h2>مودكم إيه النهارده؟</h2></div><p>شوفوا الفكرة وطريقة اللعب، وافتحوا التجربة بالاشتراك.</p></div>
-    <div class="mood-options" role="group" aria-label="اختار نوع التجربة">@foreach(['الكل' => 'كل الألعاب', 'ضحك' => 'نضحك سوا', 'تعارف' => 'نعرف بعض أكتر', 'تحدي' => 'ندخل تحدي', 'مفاجأة' => 'نفاجئ بعض'] as $value => $label)<button type="button" @click="mood = '{{ $value }}'" :aria-pressed="mood === '{{ $value }}'" :class="{ 'selected': mood === '{{ $value }}' }">{{ $label }}</button>@endforeach</div>
+    <div class="mood-options" role="group" aria-label="اختار نوع التجربة">@foreach(['الكل' => 'كل الألعاب', 'ضحك' => 'نضحك سوا', 'تعارف' => 'نعرف بعض أكتر', 'تحدي' => 'ندخل تحدي', 'مفاجأة' => 'نفاجئ بعض'] as $value => $label)<button type="button" data-analytics-mood="{{ $value }}" @click="mood = '{{ $value }}'" :aria-pressed="mood === '{{ $value }}'" :class="{ 'selected': mood === '{{ $value }}' }">{{ $label }}</button>@endforeach</div>
     <div class="discover-grid">
     @forelse($games as $game)
         @php($teaser = \App\Support\Membership::teaser($game->type))

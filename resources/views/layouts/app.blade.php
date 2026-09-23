@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if(!\App\Support\VisitorAnalytics::excluded(request()) && in_array(request()->route()?->getName(), \App\Support\VisitorAnalytics::PAGES, true))
+    <meta name="analytics-endpoint" content="{{ route('analytics.events') }}">
+    @endif
     <title>{{ $title ?? config('app.name') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

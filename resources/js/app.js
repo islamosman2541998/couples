@@ -11,3 +11,5 @@ Alpine.data('checkout', checkout);
 Alpine.start();
 
 import './home';
+
+import './analytics';
