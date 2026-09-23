@@ -9,8 +9,27 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // A host may default to MyISAM, which silently ignores foreign keys.
+        // Repair existing analytics tables before creating any dependent table.
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            foreach (['analytics_visitors', 'analytics_visits', 'analytics_events'] as $table) {
+                if (! Schema::hasTable($table)) {
+                    continue;
+                }
+                $metadata = DB::selectOne(
+                    'SELECT ENGINE AS storage_engine FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
+                    [DB::connection()->getDatabaseName(), DB::connection()->getTablePrefix().$table]
+                );
+                if ($metadata && strcasecmp($metadata->storage_engine, 'InnoDB') !== 0) {
+                    $name = DB::connection()->getQueryGrammar()->wrapTable($table);
+                    DB::statement('ALTER TABLE '.$name.' ENGINE=InnoDB');
+                }
+            }
+        }
+
         if (! Schema::hasTable('analytics_visitors')) {
             Schema::create('analytics_visitors', function (Blueprint $t) {
+                $t->engine = 'InnoDB';
                 $t->uuid('id')->primary();
                 $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
                 $t->timestamps();
@@ -18,6 +37,7 @@ return new class extends Migration
         }
         if (! Schema::hasTable('analytics_visits')) {
             Schema::create('analytics_visits', function (Blueprint $t) {
+                $t->engine = 'InnoDB';
                 $t->uuid('id')->primary();
                 $t->foreignUuid('visitor_id')->constrained('analytics_visitors')->cascadeOnDelete();
                 $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
@@ -42,6 +62,7 @@ return new class extends Migration
         }
         if (! Schema::hasTable('analytics_events')) {
             Schema::create('analytics_events', function (Blueprint $t) {
+                $t->engine = 'InnoDB';
                 $t->id();
                 $t->foreignUuid('visit_id')->constrained('analytics_visits')->cascadeOnDelete();
                 $t->string('name', 40);
@@ -50,6 +71,21 @@ return new class extends Migration
                 $t->timestamp('created_at')->useCurrent();
                 $t->index(['created_at', 'name']);
             });
+        }
+        // MyISAM may have kept the indexes without creating the constraints.
+        foreach ([
+            ['analytics_visitors', 'user_id', 'users', 'set null'],
+            ['analytics_visits', 'visitor_id', 'analytics_visitors', 'cascade'],
+            ['analytics_visits', 'user_id', 'users', 'set null'],
+            ['analytics_events', 'visit_id', 'analytics_visits', 'cascade'],
+        ] as [$table, $column, $parent, $onDelete]) {
+            $present = collect(Schema::getForeignKeys($table))
+                ->contains(fn ($key) => $key['columns'] === [$column]);
+            if (! $present) {
+                Schema::table($table, function (Blueprint $t) use ($column, $parent, $onDelete) {
+                    $t->foreign($column)->references('id')->on($parent)->onDelete($onDelete);
+                });
+            }
         }
         // MySQL DDL is not transactional: an earlier attempt may have created
         // all three tables and the column before failing to add the foreign key.
