@@ -242,6 +242,52 @@ class GameTrialTest extends TestCase
         $this->get('/admin/settings')->assertOk()->assertSee('name="trial_items"', false)->assertSee('name="activation_eta"', false);
     }
 
+    public static function mediaTypes(): array
+    {
+        return [['control'], ['challenge'], ['scratch'], ['spinner']];
+    }
+
+    /** Creates 7 items with images, sorted in reverse id order. Returns ids in trial order. */
+    private function seedMediaItems(string $type): array
+    {
+        $ids = [];
+        foreach (range(1, 7) as $i) {
+            $image = "media/{$type}-{$i}.png";
+            \Illuminate\Support\Facades\Storage::disk('premium')->put($image, 'bytes');
+            $base = ['image' => $image, 'is_active' => true, 'sort_order' => 8 - $i];
+            $ids[] = match ($type) {
+                'control' => ControlCard::create([...$base, 'title' => "C{$i}", 'description' => 'd'])->id,
+                'challenge' => ChallengeCard::create([...$base, 'title' => "C{$i}", 'description' => 'd', 'category' => 'funny'])->id,
+                'scratch' => \App\Models\ScratchCard::create([...$base, 'number' => $i, 'content' => "S{$i}", 'level' => 1])->id,
+                'spinner' => \App\Models\SpinnerImage::create([...$base, 'name' => "P{$i}", 'color' => '#123456'])->id,
+            };
+        }
+
+        return array_reverse($ids);
+    }
+
+    #[DataProvider('mediaTypes')]
+    public function test_guest_can_load_images_of_trial_items_only(string $type): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('premium');
+        $game = $this->paidGame($type);
+        $ids = $this->seedMediaItems($type);
+        $url = fn (int $id) => route('games.media', ['type' => $type, 'id' => $id]);
+
+        foreach (array_slice($ids, 0, 5) as $id) {
+            $this->get($url($id))->assertOk();
+        }
+        foreach (array_slice($ids, 5) as $id) {
+            $this->get($url($id))->assertForbidden();
+        }
+
+        $this->actingAs(\App\Models\User::factory()->create())->get($url($ids[0]))->assertOk();
+        $this->get($url($ids[6]))->assertForbidden();
+
+        $game->update(['is_active' => false]);
+        $this->get($url($ids[0]))->assertForbidden();
+    }
+
     private function itemOrder(string $html, string $type): array
     {
         preg_match_all('/TRIAL-ITEM-'.preg_quote($type, '/').'-\d{2}/', $html, $matches);

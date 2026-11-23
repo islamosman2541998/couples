@@ -59,7 +59,11 @@ class MembershipTest extends TestCase
         Storage::fake('premium');
         Storage::disk('premium')->put('scratch/example.png', 'image bytes');
         $game = Game::create(['name' => 'Scratch', 'slug' => 'scratch', 'type' => 'scratch', 'is_free' => true]);
-        $card = ScratchCard::create(['number' => 1, 'content' => 'Secret', 'image' => 'scratch/example.png', 'is_active' => true]);
+        foreach (range(1, 5) as $n) {
+            ScratchCard::create(['number' => $n, 'content' => 'Trial '.$n, 'is_active' => true, 'sort_order' => $n]);
+        }
+        // Card 6 is past the free-trial slice, so only members may load its image.
+        $card = ScratchCard::create(['number' => 6, 'content' => 'Secret', 'image' => 'scratch/example.png', 'is_active' => true, 'sort_order' => 6]);
         $url = $card->image_url;
         $this->get($url)->assertForbidden();
         $user = User::factory()->create();

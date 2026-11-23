@@ -52,6 +52,23 @@ class GameTrial
             ->orderBy('sort_order')->orderBy('id')->value('slug');
     }
 
+    /**
+     * IDs of the items whose images a trial visitor may load, in the same
+     * order and slice the game pages use.
+     */
+    public static function mediaIds(string $type): array
+    {
+        $query = match ($type) {
+            'control' => \App\Models\ControlCard::active()->orderBy('sort_order')->orderBy('id'),
+            'challenge' => \App\Models\ChallengeCard::active()->orderBy('sort_order')->orderBy('id'),
+            'scratch' => \App\Models\ScratchCard::active()->orderBy('sort_order')->orderBy('number'),
+            'spinner' => \App\Models\SpinnerImage::active()->orderBy('sort_order')->orderBy('id'),
+            default => null,
+        };
+
+        return $query ? $query->limit(self::size())->pluck('id')->all() : [];
+    }
+
     public static function snakesDice(): array
     {
         return array_slice(self::SNAKES_DICE, 0, self::size());
