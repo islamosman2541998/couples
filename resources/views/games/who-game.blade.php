@@ -3,6 +3,7 @@
     <x-game-comfort-note />
 
     <div class="min-h-screen flex flex-col" x-data="whoGame()">
+        <x-trial-banner :trial="$trial ?? null" />
 
         <!-- ===== شاشة البداية ===== -->
         <div x-show="screen === 'intro'" class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -193,6 +194,7 @@
 
         <!-- ===== شاشة النتيجة ===== -->
         <div x-show="screen === 'result'" x-cloak class="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+            <x-trial-paywall :trial="$trial ?? null" :game="$game" />
             <div class="text-7xl mb-4" x-text="score >= Math.floor(questions.length * 0.7) ? '🏆' : score >= Math.floor(questions.length * 0.4) ? '❤️' : '🤗'"></div>
             <h2 class="text-2xl font-black mb-2">انتهت اللعبة!</h2>
 
@@ -301,6 +303,7 @@
                 },
 
                 shuffle(arr) {
+                    if (globalThis.gameTrial) return arr;
                     for (let i = arr.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [arr[i], arr[j]] = [arr[j], arr[i]];

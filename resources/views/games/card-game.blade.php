@@ -3,6 +3,7 @@
     <x-game-comfort-note />
 
     <div class="min-h-screen" x-data="cardGame()">
+        <x-trial-banner :trial="$trial ?? null" />
 
         <!-- Level Selection Screen -->
         <div x-show="screen === 'levels'" class="max-w-2xl mx-auto px-4 py-12">
@@ -14,6 +15,19 @@
 
             <div class="grid gap-4">
                 @foreach($levels as $level)
+                    @php $locked = ($trial ?? null) && $level->slug !== ($trialLevel ?? null); @endphp
+                    @if($locked)
+                    <a href="{{ $trial['subscribe_url'] }}" data-trial-locked="{{ $level->slug }}" class="trial-locked-level relative block bg-gray-900 border border-gray-800 rounded-2xl p-6 text-right">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-black" style="color: {{ $level->color }}">{{ $level->name }}</h3>
+                                <p class="text-gray-500 text-sm mt-1">{{ $level->cards_count }} كارت · بيتفتح مع الاشتراك</p>
+                            </div>
+                            <span class="trial-banner-tag">للمشتركين</span>
+                        </div>
+                    </a>
+                    @continue
+                    @endif
                     <button @click="selectLevel(@js($level->slug), @js($level->name), @js($level->color))" :disabled="loading || {{ $level->cards_count }} === 0"
                             class="group relative bg-gray-900 border border-gray-800 hover:border-purple-500/50 rounded-2xl p-6 text-right transition-all transform hover:scale-105 hover:-translate-y-1">
                         <div class="flex items-center gap-4">
@@ -24,7 +38,7 @@
                             <div class="flex-1">
                                 <h3 class="text-xl font-black" style="color: {{ $level->color }}">{{ $level->name }}</h3>
                                 <p class="text-gray-500 text-sm mt-1">
-                                    {{ $level->cards_count }} كارت متاح
+                                    {{ ($trial ?? null) ? $trial['shown'].' كروت في التجربة' : $level->cards_count.' كارت متاح' }}
                                     @if($level->slug === 'easy') · غزل وذكريات وبداية لطيفة
                                     @elseif($level->slug === 'medium') · مفاجآت ولحظات تقارب
                                     @else · اعترافات رومانسية وجرأة في التعبير
@@ -146,8 +160,13 @@
                 </button>
             </div>
 
+            @if($trial ?? null)
+            <div x-show="cards.length === 0 && isFlipped" x-cloak class="mt-6">
+                <x-trial-paywall :trial="$trial" :game="$game" />
+            </div>
+            @endif
             <!-- Empty State -->
-            <div x-show="cards.length === 0 && isFlipped" x-cloak class="text-center mt-6">
+            <div x-show="cards.length === 0 && isFlipped" x-cloak class="text-center mt-6" @if($trial ?? null) hidden @endif>
                 <p class="text-gray-400 text-sm mb-4">تم الانتهاء من جميع كروت هذا المستوى</p>
                 <button @click="screen = 'levels'; resetGame()"
                         class="text-purple-400 hover:text-purple-300 text-sm underline">
@@ -246,6 +265,7 @@
                 },
 
                 shuffle(arr) {
+                    if (globalThis.gameTrial) return [...arr];
                     const a = [...arr];
                     for (let i = a.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));

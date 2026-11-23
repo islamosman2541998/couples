@@ -44,6 +44,12 @@ class SubscriptionController extends Controller
 
     public function store(Request $request)
     {
+        // Signed-in customers aren't asked to retype their account details.
+        $request->mergeIfMissing(array_filter([
+            'full_name' => $request->user()?->name,
+            'email' => $request->user()?->email,
+            'phone' => $request->user()?->phone,
+        ]));
         $validated = $request->validate([
             'game_id' => ['required', Rule::in($this->products()->pluck('id')->map(fn ($id) => (string) $id)->all())],
             'full_name' => 'required|string|max:255',

@@ -26,6 +26,10 @@
                 <h2 class="font-bold text-lg border-b border-gray-800 pb-4">الإعدادات العامة</h2>
                 <label class="block">سعر باقة كل الألعاب (ج.م)<input class="checkout-input" type="number" min="1" max="999999" step="0.01" name="membership_price" value="{{ old('membership_price', $settings['membership_price'] ?? '') }}"><span class="block text-gray-400 text-sm mt-2">اتركه فارغًا لاستخدام مجموع أسعار الألعاب المدفوعة. الباقة تفتح جميع الألعاب؛ دفعة واحدة بلا انتهاء أو تجديد تلقائي.</span></label>
                 @error('membership_price')<p class="text-red-400">{{ $message }}</p>@enderror
+                <label class="block">عدد عناصر التجربة المجانية في كل لعبة<input class="checkout-input" type="number" min="1" max="20" step="1" name="trial_items" value="{{ old('trial_items', $settings['trial_items'] ?? \App\Support\GameTrial::DEFAULT_SIZE) }}"><span class="block text-gray-400 text-sm mt-2">الزائر غير المشترك يلعب العدد ده من كل لعبة (كروت، أسئلة، لفّات، أو رميات)، ودايمًا نفس العناصر بنفس الترتيب.</span></label>
+                @error('trial_items')<p class="text-red-400">{{ $message }}</p>@enderror
+                <label class="block">وقت التفعيل المتوقع<input class="checkout-input" type="text" maxlength="120" name="activation_eta" value="{{ old('activation_eta', $settings['activation_eta'] ?? 'عادةً خلال ساعات قليلة') }}"><span class="block text-gray-400 text-sm mt-2">بيظهر للعميل في صفحة الدفع وبعد رفع الإيصال وفي ملفه الشخصي.</span></label>
+                @error('activation_eta')<p class="text-red-400">{{ $message }}</p>@enderror
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">اسم الموقع</label>
                     <input type="text" name="site_name" value="{{ $settings['site_name'] ?? '' }}"

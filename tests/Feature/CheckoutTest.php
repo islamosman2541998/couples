@@ -86,4 +86,44 @@ class CheckoutTest extends TestCase
         $this->postJson('/checkout/login', ['email' => 'blocked@example.com', 'password' => 'wrong'])->assertUnprocessable()->assertJsonValidationErrors('email');
         $this->assertGuest();
     }
+
+    public function test_signed_in_customer_submits_receipt_without_retyping_account_details(): void
+    {
+        Storage::fake('local');
+        $game = $this->game();
+        $user = User::factory()->create(['name' => 'Account Name', 'email' => 'account@example.com', 'phone' => '01099998888']);
+
+        $this->actingAs($user)->get('/subscribe/'.$game->id)->assertOk()
+            ->assertSee('type="hidden" name="full_name"', false)
+            ->assertSee('type="hidden" name="email"', false)
+            ->assertSee('نسخ');
+
+        $this->postJson('/subscribe', ['game_id' => (string) $game->id, 'receipt_image' => UploadedFile::fake()->image('r.png')])->assertCreated();
+        $this->assertDatabaseHas('subscriptions', ['user_id' => $user->id, 'full_name' => 'Account Name', 'email' => 'account@example.com', 'phone' => '01099998888']);
+    }
+
+    public function test_checkout_shows_whole_prices_and_the_activation_eta(): void
+    {
+        \App\Models\Setting::set('activation_eta', 'خلال ساعتين بالكتير');
+        $game = $this->game();
+
+        $this->get('/subscribe/'.$game->id)->assertOk()
+            ->assertSee('Paid game — 100 ج.م')
+            ->assertDontSee('100.00 ج.م')
+            ->assertSee('خلال ساعتين بالكتير');
+    }
+
+    public function test_profile_shows_eta_for_pending_and_the_reason_for_rejected_requests(): void
+    {
+        \App\Models\Setting::set('activation_eta', 'خلال ساعتين بالكتير');
+        $game = $this->game();
+        $user = User::factory()->create();
+        $base = ['user_id' => $user->id, 'game_id' => $game->id, 'full_name' => 'X', 'email' => $user->email, 'phone' => '01000000000', 'receipt_image' => 'receipts/a.png'];
+        Subscription::create($base + ['status' => 'pending']);
+        Subscription::create($base + ['status' => 'rejected', 'admin_notes' => 'المبلغ ناقص 50 جنيه']);
+
+        $this->actingAs($user)->get('/my-profile')->assertOk()
+            ->assertSee('خلال ساعتين بالكتير')
+            ->assertSee('المبلغ ناقص 50 جنيه');
+    }
 }

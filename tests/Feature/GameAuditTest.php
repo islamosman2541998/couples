@@ -33,17 +33,18 @@ class GameAuditTest extends TestCase
     {
         $game = $this->game($type);
         $this->get('/games/'.$game->slug)->assertOk();
-        $this->get('/games/'.$game->slug.'/play')->assertRedirect(route('subscribe.create', $game->id));
-        $game->update(['is_free' => false]);
-        $this->get('/games/'.$game->slug.'/play')->assertRedirect(route('subscribe.create', $game->id));
+        // Visitors without an active subscription get the free trial instead of a redirect.
+        $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
+        $game->update(['is_free' => false, 'price' => 100]);
+        $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
         $user = User::factory()->create();
-        $this->actingAs($user)->get('/games/'.$game->slug.'/play')->assertRedirect();
+        $this->actingAs($user)->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
         $sub = $this->subscription($game, $user);
-        $this->get('/games/'.$game->slug.'/play')->assertOk();
+        $this->get('/games/'.$game->slug.'/play')->assertOk()->assertDontSee('تجربة مجانية');
         $sub->update(['expires_at' => now()->subSecond()]);
-        $this->get('/games/'.$game->slug.'/play')->assertRedirect();
+        $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
         $sub->update(['expires_at' => null, 'status' => 'pending']);
-        $this->get('/games/'.$game->slug.'/play')->assertRedirect();
+        $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
         $game->update(['is_active' => false]);
         $this->get('/games/'.$game->slug)->assertNotFound();
         $this->get('/games/'.$game->slug.'/play')->assertNotFound();
@@ -57,22 +58,28 @@ class GameAuditTest extends TestCase
             Card::create(['card_level_id' => $level->id, 'content' => $target, 'target' => $target, 'is_active' => true]);
         }
         Card::create(['card_level_id' => $level->id, 'content' => 'hidden', 'target' => 'both', 'is_active' => false]);
+        $hard = CardLevel::create(['name' => 'Hard', 'slug' => 'hard', 'color' => '#000000', 'sort_order' => 5]);
+        Card::create(['card_level_id' => $hard->id, 'content' => 'locked', 'target' => 'both', 'is_active' => true]);
         $url = '/api/cards/easy?game_id='.$game->id.'&target=all';
-        $this->getJson($url)->assertForbidden();
+        $hardUrl = '/api/cards/hard?game_id='.$game->id;
+        // Non-subscribers get the free trial of the first level only.
+        $this->getJson($url)->assertOk()->assertJsonCount(3)->assertJsonMissing(['content' => 'hidden']);
+        $this->getJson($hardUrl)->assertForbidden();
         $user = User::factory()->create();
-        $this->actingAs($user)->getJson($url)->assertForbidden();
+        $this->actingAs($user)->getJson($url)->assertOk()->assertJsonCount(3)->assertJsonMissing(['content' => 'hidden']);
         $other = $this->game('spinner');
         $this->subscription($other, $user);
-        $this->getJson($url)->assertForbidden();
+        $this->getJson($hardUrl)->assertForbidden();
         $sub = $this->subscription($game, $user);
         $this->getJson($url)->assertOk()->assertJsonCount(3)->assertJsonMissing(['content' => 'hidden']);
         $this->getJson('/api/cards/easy?game_id='.$game->id.'&target=male')->assertOk()->assertJsonCount(2)->assertJsonMissing(['content' => 'female']);
         $this->getJson('/api/cards/easy')->assertUnprocessable();
         $this->getJson('/api/cards/easy?game_id='.$other->id)->assertNotFound();
+        $this->getJson($hardUrl)->assertOk();
         $sub->update(['expires_at' => now()->subDay()]);
-        $this->getJson($url)->assertForbidden();
+        $this->getJson($hardUrl)->assertForbidden();
         $game->update(['is_free' => true]);
-        $this->getJson($url)->assertForbidden();
+        $this->getJson($hardUrl)->assertForbidden();
         $game->update(['is_active' => false]);
         $this->getJson($url)->assertNotFound();
     }

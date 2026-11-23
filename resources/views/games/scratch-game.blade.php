@@ -1,6 +1,7 @@
 <x-app-layout>
     <x-slot name="title">{{ $game->name }}</x-slot>
     <div class="scratch-scene" x-data="scratchGame()" @keydown.escape.window="closeTask()">
+        <x-trial-banner :trial="$trial ?? null" />
         <div class="board-toolbar"><a href="{{ route('games.show', $game->slug) }}">→ تفاصيل اللعبة</a><span>ليلة مختلفة… دائرة ورا دائرة</span><button @click="resetOpen = true">جولة جديدة ↺</button></div>
         <article class="scratch-poster" aria-label="لوحة خربش والعب"><div class="poster-frame">
             <header class="poster-heading"><div class="poster-brand">FUNNY<br><b>COUPLES</b></div><div><p class="eyebrow">THE SCRATCH DATE</p><h1>خربش <span>والعب</span></h1><p>مهمة مخفية. لحظة قُرب. ذكرى جديدة.</p></div><div class="poster-seal">ليلتكم<br><b>على مزاجكم</b><br>✦</div></header>
@@ -22,7 +23,7 @@
                         @endif
                     @endforeach
                     </div>
-                    @if(!collect($cards)->contains(fn($card) => ($card['level'] ?? 1) === $level))<p class="board-hint">لسه مفيش مهمات في المستوى ده.</p>@endif
+                    @if(!collect($cards)->contains(fn($card) => ($card['level'] ?? 1) === $level))<p class="board-hint">{{ ($trial ?? null) ? 'المستوى ده بيتفتح مع الاشتراك.' : 'لسه مفيش مهمات في المستوى ده.' }}</p>@endif
                 </section>
             @endforeach
             <div class="poster-bottom"><section><h3>نقاط إضافية ✦</h3><small>مرة واحدة لكل اختيار في الجولة</small><template x-for="bonus in bonuses" :key="bonus.id"><label class="poster-option"><input type="checkbox" :checked="bonusIds.includes(bonus.id)" @change="toggleBonus(bonus.id)"><span x-text="bonus.label"></span><b x-text="'+' + bonus.points"></b></label></template></section>
@@ -31,6 +32,7 @@
             <footer class="poster-footer"><span>♥ كل خطوة باختياركم… والتخطي دايمًا متاح</span><span>FUNNY COUPLES</span></footer>
         </div></article>
         <p class="board-saved">✦ التقدم بيتحفظ على المتصفح ده تلقائيًا.<span x-show="saveError"> الحفظ غير متاح؛ خليك في الصفحة عشان تحتفظ بالجولة.</span></p><x-game-comfort-note />
+        @if($trial ?? null)<div x-show="cards.length && completedNumbers.length + skippedNumbers.length === cards.length" x-cloak><x-trial-paywall :trial="$trial" :game="$game" /></div>@endif
         <div class="board-finished" x-show="cards.length && completedNumbers.length + skippedNumbers.length === cards.length" x-cloak><h2>خلصتوا اللوحة! ✨</h2><p>رصدتم <strong x-text="score"></strong> نقطة وذكريات جديدة سوا.</p></div>
         <div class="board-backdrop" x-show="activeCard" x-cloak @click.self="closeTask()"><section class="board-dialog" role="dialog" aria-modal="true" aria-labelledby="task-title" @keydown.tab="trapFocus($event)">
             <button class="dialog-close" @click="closeTask()" aria-label="إغلاق المهمة">×</button><p class="eyebrow" x-text="activeCard ? 'المستوى ' + activeCard.level + ' · المهمة ' + activeCard.number : ''"></p><div class="dialog-heart">♡</div><h2 id="task-title">مفاجأتكم المرة دي</h2><template x-if="activeCard?.image"><img :src="activeCard.image" alt="صورة المهمة" class="task-image"></template><p class="task-content" x-text="activeCard?.content"></p><p class="task-points" x-text="activeCard ? 'تنفيذها يضيف ' + activeCard.level + ' نقطة لرصيدكم' : ''"></p><p x-show="activeCard && completedNumbers.includes(activeCard.number)" class="task-points">✓ المهمة دي اتحسبت بالفعل</p><button class="gold-button" @click="completeTask()" :disabled="activeCard && completedNumbers.includes(activeCard.number)">نفذنا المهمة ✓</button><button class="text-button" @click="skipTask()">تخطي من غير نقاط</button>

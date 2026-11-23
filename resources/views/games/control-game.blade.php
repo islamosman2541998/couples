@@ -2,6 +2,7 @@
     <x-slot name="title">{{ $game->name }}</x-slot>
 
     <div class="control-game" x-data="controlGame()" x-init="$watch('screen', () => $nextTick(() => $el.scrollIntoView({block: 'start'})))">
+        <x-trial-banner :trial="$trial ?? null" />
         <section x-show="screen === 'intro'" class="control-intro">
             <a href="{{ route('home') }}" class="control-back">← كل الألعاب</a>
             <div class="control-heading">
@@ -75,6 +76,7 @@
         </section>
 
         <section x-show="screen === 'done'" x-cloak class="control-result">
+            <x-trial-paywall :trial="$trial ?? null" :game="$game" />
             <div class="control-crown" aria-hidden="true">♛</div>
             <p class="control-eyebrow" x-text="answeredCount === deck.length ? 'اكتملت الجولة' : 'انتهت الجولة هنا'"></p>
             <h2 x-text="winnerText"></h2>
@@ -253,6 +255,7 @@
                 },
                 destroy() { clearTimeout(this.unlockTimer); },
                 shuffle(cards) {
+                    if (globalThis.gameTrial) return cards;
                     for (let i = cards.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [cards[i], cards[j]] = [cards[j], cards[i]];

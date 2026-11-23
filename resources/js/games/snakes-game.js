@@ -13,6 +13,7 @@ export function createSnakesGame(data = {}, environment = {}) {
     let generation = 0;
     const cells = data.cells ?? [];
     const links = data.links ?? [];
+    const trialDice = Array.isArray(data.trialDice) ? data.trialDice : null;
     const fingerprint = JSON.stringify([cells, links]);
     const defaults = () => [{name: 'الزوج', position: 0, completed: 0, skipped: 0}, {name: 'الزوجة', position: 0, completed: 0, skipped: 0}];
 
@@ -29,6 +30,8 @@ export function createSnakesGame(data = {}, environment = {}) {
         get task() { return this.pending ? this.cell(this.pending.destination) : null; },
         get peekCell() { return this.peekNumber ? this.cell(this.peekNumber) : null; },
         get canPlay() { return this.cells.length === 100; },
+        get isTrial() { return trialDice !== null; },
+        get trialOver() { return trialDice !== null && this.turns >= trialDice.length && this.phase === 'ready'; },
         get dicePips() {
             return {1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9]}[this.displayDice] ?? [5];
         },
@@ -86,10 +89,11 @@ export function createSnakesGame(data = {}, environment = {}) {
         },
         async roll() {
             if (this.screen !== 'game' || this.phase !== 'ready' || this.winner) return;
+            if (trialDice !== null && this.turns >= trialDice.length) return;
             const token = generation;
             const playerIndex = this.currentPlayer;
             const from = this.activePlayer.position;
-            this.dice = Math.min(6, Math.max(1, Math.floor(random() * 6) + 1));
+            this.dice = trialDice !== null ? trialDice[this.turns] : Math.min(6, Math.max(1, Math.floor(random() * 6) + 1));
             const overshoot = from + this.dice > 100;
             const landed = overshoot ? from : from + this.dice;
             const link = overshoot ? null : this.links.find(link => link.from === landed);

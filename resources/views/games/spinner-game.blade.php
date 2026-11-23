@@ -3,6 +3,7 @@
     <x-game-comfort-note />
 
     <div class="max-w-2xl mx-auto px-4 py-8" x-data="spinnerGame()">
+        <x-trial-banner :trial="$trial ?? null" />
 
         <!-- Header -->
         <div class="text-center mb-8">
@@ -24,7 +25,7 @@
 
                 <!-- Center Button -->
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <button @click="spin()" :disabled="isSpinning"
+                    <button @click="spin()" :disabled="isSpinning || trialOver"
                         class="w-20 h-20 rounded-full bg-white shadow-2xl flex flex-col items-center justify-center transition-all hover:scale-110 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed z-10">
                         <div class="text-2xl" x-text="isSpinning ? '⏳' : '🎯'"></div>
                         <div class="text-xs font-black text-gray-800 mt-1" x-text="isSpinning ? '...' : 'لف'"></div>
@@ -54,6 +55,12 @@
                 @endif
             </div>
 
+            @if($trial ?? null)
+            <div x-show="trialOver && !isSpinning" x-cloak>
+                <x-trial-paywall :trial="$trial" :game="$game" />
+            </div>
+            @endif
+
             <!-- Spin History -->
             <div x-show="history.length > 0" x-cloak class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
                 <h3 class="font-bold mb-3 text-sm text-gray-400">آخر النتائج</h3>
@@ -76,6 +83,8 @@
             function spinnerGame() {
                 return {
                     items: spinnerItems,
+                    trialSpins: 0,
+                    get trialOver() { return Array.isArray(globalThis.spinnerTrialSequence) && this.trialSpins >= globalThis.spinnerTrialSequence.length; },
                     isSpinning: false,
                     result: null,
                     history: [],
@@ -145,12 +154,18 @@
                     },
 
                     spin() {
-                        if (this.isSpinning || !this.items.length) return;
+                        if (this.isSpinning || !this.items.length || this.trialOver) return;
 
                         this.isSpinning = true;
                         this.result = null;
 
-                        const winnerIdx = Math.floor(Math.random() * this.items.length);
+                        let winnerIdx = Math.floor(Math.random() * this.items.length);
+                        const trialSequence = globalThis.spinnerTrialSequence;
+                        if (Array.isArray(trialSequence)) {
+                            const fixed = this.items.findIndex(item => item.id === trialSequence[this.trialSpins]);
+                            if (fixed >= 0) winnerIdx = fixed;
+                            this.trialSpins++;
+                        }
 
                         const n = this.items.length;
                         const arc = (2 * Math.PI) / n;
@@ -216,5 +231,6 @@
                 }
             }
         </script>
+        <script>globalThis.spinnerTrialSequence = @json($trialSequence ?? null);</script>
     @endpush
 </x-app-layout>

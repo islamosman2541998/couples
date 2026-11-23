@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
+use App\Notifications\SubscriptionStatusChanged;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class SubscriptionManageController extends Controller
@@ -64,6 +66,8 @@ class SubscriptionManageController extends Controller
             report($e);
         }
 
+        $this->notifyCustomer($subscription);
+
         return back()->with('success', 'تم قبول الاشتراك بنجاح');
     }
 
@@ -74,6 +78,18 @@ class SubscriptionManageController extends Controller
             'admin_notes' => $request->admin_notes,
         ]);
 
+        $this->notifyCustomer($subscription);
+
         return back()->with('success', 'تم رفض الاشتراك');
+    }
+
+    /** Email the customer; a mail failure must never undo or block the admin's decision. */
+    private function notifyCustomer(Subscription $subscription): void
+    {
+        try {
+            Notification::route('mail', $subscription->email)->notify(new SubscriptionStatusChanged($subscription));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

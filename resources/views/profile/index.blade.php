@@ -47,6 +47,11 @@
                             <div>
                                 <div class="font-bold">{{ $sub->product_name }}</div>
                                 <div class="text-xs text-gray-500 mt-1">{{ optional($sub->created_at)->format('Y/m/d') ?? '-' }}</div>
+                                @if($sub->status === 'pending')
+                                    <div class="text-xs text-yellow-300/90 mt-1">قيد المراجعة · وقت التفعيل {{ \App\Models\Setting::get('activation_eta', 'عادةً خلال ساعات قليلة') }}</div>
+                                @elseif($sub->status === 'rejected' && $sub->admin_notes)
+                                    <div class="text-xs text-red-300/90 mt-1">سبب الرفض: {{ $sub->admin_notes }}</div>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-3">

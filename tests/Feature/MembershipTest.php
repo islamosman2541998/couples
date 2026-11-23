@@ -17,11 +17,13 @@ class MembershipTest extends TestCase
         Storage::fake('local');
         Setting::set('membership_price', '700');
         $game = Game::create(['name' => 'Scratch', 'slug' => 'scratch', 'type' => 'scratch', 'is_free' => true]);
-        ScratchCard::create(['number' => 1, 'content' => 'PRIVATE TASK', 'is_active' => true]);
+        foreach (range(1, 6) as $n) {
+            ScratchCard::create(['number' => $n, 'content' => $n === 6 ? 'PRIVATE TASK' : 'Trial task '.$n, 'is_active' => true, 'sort_order' => $n]);
+        }
         $this->get('/')->assertOk()->assertSee('700')->assertDontSee('PRIVATE TASK');
         $this->get('/games/scratch')->assertOk()->assertDontSee('PRIVATE TASK');
-        $this->get('/games/scratch/play')->assertRedirect();
-        $this->getJson('/games/scratch/scratch-cards/1')->assertForbidden();
+        $this->get('/games/scratch/play')->assertOk()->assertSee('تجربة مجانية')->assertDontSee('PRIVATE TASK');
+        $this->getJson('/games/scratch/scratch-cards/6')->assertForbidden();
         $this->get('/membership')->assertOk()->assertSee('باقة كل الألعاب');
         $user = User::factory()->create();
         $this->actingAs($user)->postJson('/subscribe', [
@@ -34,7 +36,7 @@ class MembershipTest extends TestCase
         $this->assertNull($sub->game_id);
         $this->assertSame('700.00', $sub->amount);
         $this->assertSame('pending', $sub->status);
-        $this->get('/games/scratch/play')->assertRedirect();
+        $this->get('/games/scratch/play')->assertOk()->assertDontSee('PRIVATE TASK');
         $this->get('/my-profile')->assertOk()->assertSee('باقة كل الألعاب');
         $admin = User::factory()->create(['is_admin' => true]);
         $this->actingAs($admin)->get('/admin/subscriptions/'.$sub->id)->assertOk()->assertSee('باقة كل الألعاب');
@@ -43,10 +45,10 @@ class MembershipTest extends TestCase
         $this->actingAs($user)->get('/games/scratch/play')->assertOk()->assertSee('PRIVATE TASK');
         $this->getJson('/games/scratch/scratch-cards/1')->assertOk();
         $sub->update(['expires_at' => now()->subMinute()]);
-        $this->get('/games/scratch/play')->assertRedirect();
-        $this->getJson('/games/scratch/scratch-cards/1')->assertForbidden();
+        $this->get('/games/scratch/play')->assertOk()->assertSee('تجربة مجانية')->assertDontSee('PRIVATE TASK');
+        $this->getJson('/games/scratch/scratch-cards/6')->assertForbidden();
         $sub->update(['expires_at' => null, 'status' => 'rejected']);
-        $this->get('/games/scratch/play')->assertRedirect();
+        $this->get('/games/scratch/play')->assertOk()->assertDontSee('PRIVATE TASK');
         $sub->update(['status' => 'approved']);
         $user->update(['is_active' => false]);
         $this->assertFalse($user->hasActiveSubscription($game->id));

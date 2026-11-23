@@ -5,6 +5,7 @@
     @endpush
 
     <div class="sl-game" x-data="snakesGame" x-init="$watch('screen', () => $nextTick(() => $el.scrollIntoView({block: 'start'}))); $watch('phase', value => { if (window.matchMedia('(max-width: 900px)').matches &amp;&amp; ['rolling', 'challenge', 'won'].includes(value)) $nextTick(() => (value === 'rolling' ? $refs.boardArea : $refs.turnArea).scrollIntoView({block: 'start', behavior: reducedMotion ? 'instant' : 'smooth'})) })">
+        <x-trial-banner :trial="$trial ?? null" />
         <div class="sl-shell">
             <header class="sl-header">
                 <a href="{{ route('home') }}" class="sl-quiet">← الألعاب</a>
@@ -66,7 +67,8 @@
                     </div>
 
                     <aside class="sl-play-panel" x-ref="turnArea" style="scroll-margin-top:80px">
-                        <div x-show="phase !== 'won'" class="sl-turn-panel">
+                        @if($trial ?? null)<div x-show="trialOver" x-cloak><x-trial-paywall :trial="$trial" :game="$game" /></div>@endif
+                        <div x-show="phase !== 'won' && !trialOver" class="sl-turn-panel">
                             <span class="sl-eyebrow" x-text="'دور ' + activePlayer.name"></span>
                             <h2 x-text="phase === 'challenge' ? 'لحظتكم هنا' : busy ? 'يا ترى الحظ مخبّي إيه؟' : 'جاهز للمفاجأة؟'"></h2>
                             <div class="sl-dice-row"><div class="sl-dice" :class="busy && 'sl-dice-rolling'" role="img" :aria-label="'النرد: ' + displayDice"><template x-for="pip in 9" :key="pip"><i :class="dicePips.includes(pip) && 'sl-pip-visible'"></i></template></div><div><b x-text="busy ? 'بنحرّك القطعة…' : 'آخر رمية: ' + (turns ? dice : '—')"></b><small>من ١ إلى ٦ · دور لكل لاعب</small></div></div>
@@ -95,6 +97,6 @@
     </div>
 
     @push('scripts')
-    <script>window.snakesGameData = {cells: @json($cells), links: @json($boardLinks), storageKey: 'couples-snakes-{{ $game->id }}'};</script>
+    <script>window.snakesGameData = {!! json_encode(array_filter(['cells' => $cells, 'links' => $boardLinks, 'storageKey' => 'couples-snakes-'.(($trial ?? null) ? 'trial-' : '').$game->id, 'trialDice' => $trialDice ?? null], fn ($v) => $v !== null), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};</script>
     @endpush
 </x-app-layout>

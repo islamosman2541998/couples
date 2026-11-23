@@ -8,7 +8,18 @@
                 <div>
                     <h2 class="text-xl font-bold">{{ $subscription->full_name }}</h2>
                     <p class="text-gray-400 text-sm mt-1">{{ $subscription->email }}</p>
-                    <p class="text-gray-500 text-sm">📞 {{ $subscription->phone }}</p>
+                    <p class="text-gray-500 text-sm" dir="ltr">{{ $subscription->phone }}</p>
+                    @php
+                        $waText = match ($subscription->status) {
+                            'approved' => "أهلاً {$subscription->full_name}، اشتراكك في «{$subscription->product_name}» اتفعّل. ادخل بحسابك وابدأوا اللعب: ".route('home'),
+                            'rejected' => "أهلاً {$subscription->full_name}، بخصوص طلب اشتراكك في «{$subscription->product_name}»: ماقدرناش نفعّله".($subscription->admin_notes ? " — {$subscription->admin_notes}" : '').'. ممكن تبعتلنا إيصال جديد؟',
+                            default => "أهلاً {$subscription->full_name}، وصلنا طلب اشتراكك في «{$subscription->product_name}» وبنراجعه دلوقتي.",
+                        };
+                        $waLink = \App\Support\Phone::whatsapp($subscription->phone, $waText);
+                    @endphp
+                    @if($waLink)
+                        <a href="{{ $waLink }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-green-600/20 border border-green-500/40 text-green-300 text-sm font-bold hover:bg-green-600/30">ابعت للعميل على واتساب</a>
+                    @endif
                 </div>
                 <span class="px-3 py-1 text-sm rounded-full
                     {{ $subscription->status === 'approved' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :

@@ -28,7 +28,7 @@
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
                     <div class="text-4xl mb-3">💬</div>
                     <h3 class="font-bold mb-2">واتساب</h3>
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\Setting::get('contact_whatsapp')) }}"
+                    <a href="{{ \App\Support\Phone::whatsapp(\App\Models\Setting::get('contact_whatsapp')) }}" target="_blank" rel="noopener"
                        class="text-green-400 hover:text-green-300">
                         {{ \App\Models\Setting::get('contact_whatsapp') }}
                     </a>

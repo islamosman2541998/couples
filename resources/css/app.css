@@ -200,3 +200,20 @@ body:has(.floating-whatsapp) .purchase-toast-right { bottom: max(100px, calc(env
 
 
 .plans-grid.bundle-only{grid-template-columns:1fr;max-width:650px;margin-inline:auto}
+
+/* Free trial */
+.trial-banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px auto;max-width:56rem;width:calc(100% - 32px);padding:10px 14px;border:1px solid #f9a8d433;border-radius:14px;background:#2a1830e6;color:#f3e8f0;font-size:13px;line-height:1.7;position:relative;z-index:5}
+.trial-banner-tag{padding:2px 10px;border-radius:999px;background:#db277733;color:#fbcfe8;font-weight:800;font-size:12px;white-space:nowrap}
+.trial-banner-text{flex:1 1 220px}
+.trial-banner-link{padding:6px 12px;border-radius:10px;background:#fdf2f8;color:#831843;font-weight:800;white-space:nowrap;min-height:36px;display:inline-flex;align-items:center}
+.trial-paywall{max-width:32rem;margin:20px auto;padding:26px 22px;border:1px solid #f9a8d440;border-radius:22px;background:linear-gradient(150deg,#2b1733,#141021);color:#f8f1ee;text-align:center;position:relative;z-index:5}
+.trial-paywall-eyebrow{color:#f9a8d4;font-size:13px;font-weight:700;margin-bottom:6px}
+.trial-paywall-title{font-size:24px;font-weight:900;margin-bottom:10px}
+.trial-paywall-text{color:#cdbfd3;font-size:14px;line-height:1.9;margin-bottom:18px}
+.trial-paywall-actions{display:grid;gap:10px}
+.trial-paywall-primary{display:block;padding:14px 18px;border-radius:14px;background:linear-gradient(110deg,#9333ea,#db2777);color:#fff;font-weight:800}
+.trial-paywall-secondary{display:block;padding:12px 18px;border-radius:14px;border:1px solid #ffffff26;color:#e9d5ff;font-weight:700}
+.trial-locked{opacity:.45;cursor:not-allowed}
+.discover-link-secondary{color:#efc5aa;font-weight:700;text-decoration:underline;text-underline-offset:6px;padding:12px 4px}
+.checkout-copy{flex-shrink:0;min-height:36px;padding:6px 12px;border-radius:10px;border:1px solid #60a5fa55;background:#1e3a8a55;color:#bfdbfe;font-size:13px;font-weight:700}
+.checkout-eta{padding:12px 14px;border-radius:12px;background:#14532d33;border:1px solid #22c55e33;color:#bbf7d0;font-size:13px;line-height:1.8}

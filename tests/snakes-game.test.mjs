@@ -84,3 +84,20 @@ test('disabled task is a rest and does not affect completed or skipped totals', 
     game.reducedMotion = true; game.startGame(); await game.roll(); game.completeTask(true);
     assert.equal(game.players[0].completed, 0); assert.equal(game.players[0].skipped, 0); assert.equal(game.currentPlayer, 1);
 });
+
+test('trial mode follows the fixed dice and stops after the last one', async () => {
+    const saved = new Map();
+    const storage = {getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key)};
+    const game = createSnakesGame({cells, links, storageKey: 'trial', trialDice: [3, 6]}, {random: () => 0.99, storage});
+    game.reducedMotion = true;
+    game.startGame();
+    assert.equal(game.trialOver, false);
+    await game.roll(); assert.equal(game.dice, 3); assert.equal(game.players[0].position, 22);
+    game.completeTask(true);
+    await game.roll(); assert.equal(game.dice, 6); assert.equal(game.players[1].position, 6);
+    assert.equal(game.trialOver, false, 'the last task is still open');
+    game.completeTask(true);
+    assert.equal(game.trialOver, true);
+    await game.roll();
+    assert.equal(game.turns, 2); assert.equal(game.phase, 'ready');
+});

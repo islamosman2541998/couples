@@ -5,7 +5,23 @@ export function checkout(config) {
         selectedGame: String(config.gameId), games: config.games,
         details: { full_name: config.user?.name || '', email: config.user?.email || '', phone: config.user?.phone || '' },
         get currentGame() { return this.games.find(game => String(game.id) === this.selectedGame); },
-        get amount() { return Number(this.currentGame?.price || 0).toFixed(2); },
+        get amount() {
+            const value = Math.round(Number(this.currentGame?.price || 0) * 100) / 100;
+            return Number.isInteger(value) ? String(value) : value.toFixed(2);
+        },
+        get needsPhone() { return !this.user?.phone; },
+        copied: null,
+        async copy(key, text) {
+            try {
+                await navigator.clipboard.writeText(String(text));
+            } catch {
+                const field = document.createElement('textarea');
+                field.value = String(text); document.body.appendChild(field); field.select();
+                try { document.execCommand('copy'); } finally { field.remove(); }
+            }
+            this.copied = key;
+            setTimeout(() => { if (this.copied === key) this.copied = null; }, 2000);
+        },
         switchMode(mode) { this.mode = mode; this.authErrors = []; },
         async request(url, body) {
             const response = await fetch(url, {

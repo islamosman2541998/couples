@@ -11,6 +11,7 @@ use App\Models\ScratchCard;
 use App\Models\SnakeCell;
 use App\Models\SpinnerImage;
 use App\Models\WhoQuestion;
+use App\Support\GameTrial;
 use Illuminate\Http\JsonResponse;
 
 class GameController extends Controller
@@ -27,7 +28,9 @@ class GameController extends Controller
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
         abort_unless($game->type === 'scratch', 404);
 
-        abort_unless(auth()->user()?->hasActiveSubscription($game->id) ?? false, 403);
+        if (GameTrial::applies($game, auth()->user())) {
+            abort_unless($this->trialScratchCards()->pluck('number')->contains($number), 403);
+        }
 
         $card = ScratchCard::active()->where('number', $number)->firstOrFail();
 
@@ -40,21 +43,26 @@ class GameController extends Controller
     {
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        if (! (auth()->user()?->hasActiveSubscription($game->id) ?? false)) {
-            return redirect()->route('subscribe.create', $game->id)
-                ->with('warning', 'هذه اللعبة تتطلب اشتراكاً مدفوعاً');
-        }
+        $isTrial = GameTrial::applies($game, auth()->user());
+        $trialSize = GameTrial::size();
+        $limit = fn ($query) => $isTrial ? $query->orderBy('id')->limit($trialSize) : $query;
+        $trialMeta = fn (int $shown, ?int $total = null) => $isTrial ? GameTrial::meta($game, $shown, $total) : null;
 
         if ($game->type === 'card') {
             $levels = CardLevel::withCount(['cards' => fn ($q) => $q->where('is_active', true)])
                 ->orderBy('sort_order')
                 ->get();
 
-            return response()->view('games.card-game', compact('game', 'levels'))->header('Cache-Control', 'private, no-store');
+            $trialLevel = $isTrial ? GameTrial::cardLevelSlug() : null;
+            $trialLevelTotal = $trialLevel ? (int) $levels->firstWhere('slug', $trialLevel)?->cards_count : 0;
+            $trial = $trialMeta(min($trialSize, $trialLevelTotal), $levels->sum('cards_count'));
+
+            return response()->view('games.card-game', compact('game', 'levels', 'trial', 'trialLevel'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'control') {
-            $cards = ControlCard::active()->orderBy('sort_order')->orderBy('id')->get()
+            $total = ControlCard::active()->count();
+            $cards = ControlCard::active()->orderBy('sort_order')->orderBy('id')->when($isTrial, fn ($q) => $q->limit($trialSize))->get()
                 ->map(fn ($card) => [
                     'id' => $card->id,
                     'title' => $card->title,
@@ -62,12 +70,19 @@ class GameController extends Controller
                     'image' => $card->image ? $card->image_url : null,
                 ])->values()->toArray();
 
-            return response()->view('games.control-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
+            $trial = $trialMeta(count($cards), $total);
+
+            return response()->view('games.control-game', compact('game', 'cards', 'trial'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'snakes') {
             $stored = SnakeCell::whereBetween('number', [1, 100])->get()->keyBy('number');
-            $cells = collect(range(1, 100))->map(function ($number) use ($stored) {
+            $trialDice = $isTrial ? GameTrial::snakesDice() : null;
+            $visible = $isTrial ? GameTrial::snakesDestinations($trialDice, config('snakes.links')) : null;
+            $cells = collect(range(1, 100))->map(function ($number) use ($stored, $visible) {
+                if ($visible !== null && ! in_array($number, $visible, true)) {
+                    return ['number' => $number, 'title' => 'للمشتركين', 'content' => 'الخانة دي بتتكشف مع الاشتراك.', 'mood' => 'warm', 'active' => false];
+                }
                 $cell = $stored->get($number);
                 $active = $cell && $cell->is_active;
 
@@ -81,7 +96,9 @@ class GameController extends Controller
             })->all();
             $boardLinks = config('snakes.links');
 
-            return response()->view('games.snakes-game', compact('game', 'cells', 'boardLinks'))->header('Cache-Control', 'private, no-store');
+            $trial = $trialMeta($isTrial ? count($trialDice) : 0);
+
+            return response()->view('games.snakes-game', compact('game', 'cells', 'boardLinks', 'trial', 'trialDice'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'spinner') {
@@ -95,24 +112,26 @@ class GameController extends Controller
                 ];
             })->values()->toArray();
 
-            return response()->view('games.spinner-game', compact('game', 'images', 'spinnerData'))->header('Cache-Control', 'private, no-store');
+            $trialSequence = $isTrial ? $images->sortBy([['sort_order', 'asc'], ['id', 'asc']])->take($trialSize)->pluck('id')->values()->all() : null;
+            $trial = $trialMeta($isTrial ? count($trialSequence) : 0, $images->count());
+
+            return response()->view('games.spinner-game', compact('game', 'images', 'spinnerData', 'trial', 'trialSequence'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'scratch') {
-            $cards = ScratchCard::active()
-                ->orderBy('sort_order')
-                ->orderBy('number')
-                ->get()
+            $total = ScratchCard::active()->count();
+            $cards = ($isTrial ? $this->trialScratchCards() : ScratchCard::active()->orderBy('sort_order')->orderBy('number')->get())
                 ->map(fn ($card) => $this->scratchCardData($card))
                 ->values()
                 ->toArray();
+            $trial = $trialMeta(count($cards), $total);
 
-            return response()->view('games.scratch-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
+            return response()->view('games.scratch-game', compact('game', 'cards', 'trial'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'who') {
-            $questions = WhoQuestion::active()
-                ->orderBy('sort_order')
+            $total = WhoQuestion::active()->count();
+            $questions = $limit(WhoQuestion::active()->orderBy('sort_order'))
                 ->get()
                 ->map(fn ($q) => [
                     'id' => $q->id,
@@ -125,12 +144,14 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return response()->view('games.who-game', compact('game', 'questions'))->header('Cache-Control', 'private, no-store');
+            $trial = $trialMeta(count($questions), $total);
+
+            return response()->view('games.who-game', compact('game', 'questions', 'trial'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'challenge') {
-            $cards = ChallengeCard::active()
-                ->orderBy('sort_order')
+            $total = ChallengeCard::active()->count();
+            $cards = $limit(ChallengeCard::active()->orderBy('sort_order'))
                 ->get()
                 ->map(fn ($c) => [
                     'id' => $c->id,
@@ -146,12 +167,14 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return response()->view('games.challenge-game', compact('game', 'cards'))->header('Cache-Control', 'private, no-store');
+            $trial = $trialMeta(count($cards), $total);
+
+            return response()->view('games.challenge-game', compact('game', 'cards', 'trial'))->header('Cache-Control', 'private, no-store');
         }
 
         if ($game->type === 'know_me') {
-            $questions = KnowMeQuestion::active()
-                ->orderBy('sort_order')
+            $total = KnowMeQuestion::active()->count();
+            $questions = $limit(KnowMeQuestion::active()->orderBy('sort_order'))
                 ->get()
                 ->map(fn ($q) => [
                     'id' => $q->id,
@@ -167,10 +190,17 @@ class GameController extends Controller
                 ->values()
                 ->toArray();
 
-            return response()->view('games.know-me-game', compact('game', 'questions'))->header('Cache-Control', 'private, no-store');
+            $trial = $trialMeta(count($questions), $total);
+
+            return response()->view('games.know-me-game', compact('game', 'questions', 'trial'))->header('Cache-Control', 'private, no-store');
         }
 
         abort(404);
+    }
+
+    private function trialScratchCards()
+    {
+        return ScratchCard::active()->orderBy('sort_order')->orderBy('number')->limit(GameTrial::size())->get();
     }
 
     private function scratchCardData(ScratchCard $card): array

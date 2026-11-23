@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Card;
 use App\Models\CardLevel;
 use App\Models\Game;
+use App\Support\GameTrial;
 use Illuminate\Http\Request;
 
 class CardApiController extends Controller
@@ -16,9 +17,17 @@ class CardApiController extends Controller
             'target' => ['sometimes', 'in:all,both,male,female'],
         ]);
         $game = Game::active()->where('type', 'card')->findOrFail($request->integer('game_id'));
-        abort_unless($request->user()?->hasActiveSubscription($game->id) ?? false, 403);
-
         $level = CardLevel::where('slug', $levelSlug)->firstOrFail();
+
+        if (GameTrial::applies($game, $request->user())) {
+            abort_unless($level->slug === GameTrial::cardLevelSlug(), 403);
+
+            $cards = Card::where('card_level_id', $level->id)->where('is_active', true)
+                ->orderBy('sort_order')->orderBy('id')->limit(GameTrial::size())
+                ->get(['id', 'content', 'target']);
+
+            return response()->json($cards)->header('Cache-Control', 'private, no-store');
+        }
 
         $target = $request->query('target', 'both');
 

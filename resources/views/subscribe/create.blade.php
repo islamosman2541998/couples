@@ -55,27 +55,32 @@
 
             <section x-ref="payment" class="checkout-card scroll-mt-24" aria-labelledby="checkout-payment-heading">
                 <div class="flex items-center gap-3 mb-5"><span class="checkout-step">2</span><div><h2 id="checkout-payment-heading" class="font-bold text-lg">الدفع وتأكيد الاشتراك</h2><p class="text-gray-400 text-xs mt-1">حوّل المبلغ ثم ارفع صورة الإيصال للمراجعة</p></div></div>
-                <label class="checkout-label mb-5">اختار اشتراكك<select class="checkout-input" x-model="selectedGame" :disabled="paymentBusy">@foreach($paidGames as $item)<option value="{{ $item->id }}" @selected($item->id === $game->id)>{{ $item->name }} — {{ number_format($item->price, 2) }} ج.م</option>@endforeach</select></label>
+                <label class="checkout-label mb-5">اختار اشتراكك<select class="checkout-input" x-model="selectedGame" :disabled="paymentBusy">@foreach($paidGames as $item)<option value="{{ $item->id }}" @selected($item->id === $game->id)>{{ $item->name }} — {{ \App\Support\Money::egp($item->price) }} ج.م</option>@endforeach</select></label>
                 <div class="rounded-xl bg-blue-900/20 border border-blue-500/25 p-5 mb-6">
                     <h3 class="text-blue-300 font-bold mb-3">بيانات التحويل · فودافون كاش</h3>
                     <p class="text-gray-400 text-xs mb-2">رقم التحويل</p>
-                    <p class="font-mono text-lg font-bold break-all bg-gray-950/50 rounded-lg px-3 py-2" dir="ltr">{{ \App\Models\Setting::get('bank_account', '') }}</p>
-                    <div class="flex items-center justify-between gap-4 mt-4"><span class="text-sm text-gray-300">المبلغ المطلوب بالجنيه المصري</span><strong class="text-2xl text-yellow-300" x-text="amount">{{ number_format($game->price, 2) }}</strong></div>
+                    @php($walletNumber = \App\Models\Setting::get('bank_account', ''))
+                    <div class="flex items-center gap-2 bg-gray-950/50 rounded-lg px-3 py-2">
+                        <p class="font-mono text-lg font-bold break-all flex-1" dir="ltr">{{ $walletNumber }}</p>
+                        <button type="button" class="checkout-copy" @click="copy('number', @js($walletNumber))" x-text="copied === 'number' ? 'اتنسخ ✓' : 'نسخ الرقم'">نسخ الرقم</button>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 mt-4"><span class="text-sm text-gray-300">المبلغ المطلوب بالجنيه المصري</span><span class="flex items-center gap-2"><strong class="text-2xl text-yellow-300" x-text="amount">{{ \App\Support\Money::egp($game->price) }}</strong><button type="button" class="checkout-copy" @click="copy('amount', amount)" x-text="copied === 'amount' ? 'اتنسخ ✓' : 'نسخ'">نسخ</button></span></div>
                 </div>
+                <p class="checkout-eta mb-5"><strong>وقت التفعيل:</strong> {{ \App\Models\Setting::get('activation_eta', 'عادةً خلال ساعات قليلة') }} من إرسال الإيصال، وهتوصلك رسالة على إيميلك أول ما يتفعّل.</p>
                 <p x-show="!user" class="text-amber-300 text-sm mb-4">أنشئ حساباً أو سجّل الدخول بالأعلى لتكمل إرسال الإيصال.</p>
                 <div x-show="paymentErrors.length" x-cloak class="checkout-error" role="alert"><template x-for="(error, index) in paymentErrors" :key="index"><p x-text="error"></p></template></div>
                 <form method="POST" action="{{ route('subscribe.store') }}" enctype="multipart/form-data" @submit.prevent="submitPayment($el)">
                     @csrf
                     <input type="hidden" name="game_id" :value="selectedGame" value="{{ $game->id }}">
                     <fieldset :disabled="!user || paymentBusy" class="space-y-4 disabled:opacity-60">
-                        <label class="checkout-label">الاسم الكامل<input class="checkout-input" name="full_name" x-model="details.full_name" autocomplete="name" maxlength="255" required></label>
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <label class="checkout-label">رقم الموبايل<input class="checkout-input" name="phone" x-model="details.phone" type="tel" autocomplete="tel" maxlength="20" dir="ltr" required></label>
-                            <label class="checkout-label">البريد الإلكتروني<input class="checkout-input" name="email" x-model="details.email" type="email" autocomplete="email" maxlength="255" dir="ltr" required></label>
-                        </div>
+                        <input type="hidden" name="full_name" :value="details.full_name">
+                        <input type="hidden" name="email" :value="details.email">
+                        <p x-show="user" class="text-sm text-gray-300">الطلب هيتسجّل باسم <strong x-text="details.full_name"></strong> · <span dir="ltr" x-text="details.email"></span></p>
+                        <label x-show="needsPhone" class="checkout-label">رقم الموبايل (علشان نتواصل معاك لو احتجنا)<input class="checkout-input" name="phone" x-model="details.phone" :disabled="!needsPhone" type="tel" autocomplete="tel" maxlength="20" dir="ltr" required></label>
+                        <input type="hidden" name="phone" :value="details.phone" :disabled="needsPhone">
                         <label class="checkout-label">صورة إيصال التحويل
                             <span class="block border-2 border-dashed border-purple-500/30 rounded-xl p-5 mt-2 text-center bg-purple-500/5">
-                                <span class="block text-3xl mb-2" aria-hidden="true">📸</span>
+                                <svg class="mx-auto mb-2 w-8 h-8 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 9.5 3.5h5a1.5 1.5 0 0 1 1.2.7L16.9 6h1.6A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>
                                 <span class="block text-xs text-gray-400 mb-3">JPG، PNG، WEBP — حتى 5 ميجابايت</span>
                                 <input type="file" name="receipt_image" accept="image/jpeg,image/png,image/webp" @change="chooseReceipt($event)" class="block w-full text-xs text-gray-300 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:px-3 file:py-2 file:ml-3" required>
                                 <img x-show="preview" x-cloak :src="preview" alt="معاينة إيصال التحويل" class="max-h-56 max-w-full mx-auto rounded-xl mt-4">
@@ -89,6 +94,7 @@
         <section x-show="success" x-cloak x-ref="success" tabindex="-1" role="status" class="checkout-card text-center">
             <div class="text-5xl mb-5">✓</div><h2 class="text-2xl font-black text-green-300 mb-4">تم إرسال طلبك بنجاح!</h2>
             <p class="text-gray-300 leading-relaxed mb-6" x-text="successMessage"></p>
+            <p class="checkout-eta mb-6"><strong>وقت التفعيل:</strong> {{ \App\Models\Setting::get('activation_eta', 'عادةً خلال ساعات قليلة') }}. هنبعتلك إيميل أول ما اللعبة تتفتح.</p>
             <a href="{{ route('profile.index') }}" class="checkout-submit inline-block">متابعة طلباتي من ملفي الشخصي ←</a>
         </section>
         <noscript><p class="checkout-error">فعّل JavaScript لإتمام إنشاء الحساب ورفع الإيصال داخل الصفحة.</p></noscript>

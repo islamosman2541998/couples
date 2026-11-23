@@ -36,7 +36,7 @@ test('account creation rotates CSRF before the receipt request and clears the pa
 test('switching game updates amount without losing customer data', () => {
     const state = checkout({ ...config, user: account });
     state.selectedGame = '2';
-    assert.equal(state.amount, '75.00');
+    assert.equal(state.amount, '75');
     assert.equal(state.details.phone, account.phone);
 });
 
@@ -67,4 +67,30 @@ test('guest and duplicate submissions do not send another receipt', async () => 
     state.paymentBusy = true;
     await state.submitPayment({});
     assert.equal(requests, 0);
+});
+
+test('amount drops decimals only for whole prices', () => {
+    const state = checkout({ ...config, games: [{ id: 1, price: '700.00' }, { id: 2, price: '199.50' }] });
+    assert.equal(state.amount, '700');
+    state.selectedGame = '2';
+    assert.equal(state.amount, '199.50');
+});
+
+test('copy writes to the clipboard and marks the copied field', async () => {
+    const original = globalThis.navigator;
+    const written = [];
+    Object.defineProperty(globalThis, 'navigator', { value: { clipboard: { writeText: async text => { written.push(text); } } }, configurable: true });
+    try {
+        const state = checkout(config);
+        await state.copy('number', '01066490296');
+        assert.deepEqual(written, ['01066490296']);
+        assert.equal(state.copied, 'number');
+    } finally {
+        Object.defineProperty(globalThis, 'navigator', { value: original, configurable: true });
+    }
+});
+
+test('the phone field is only needed when the account has no phone', () => {
+    assert.equal(checkout({ ...config, user: account }).needsPhone, false);
+    assert.equal(checkout({ ...config, user: { ...account, phone: null } }).needsPhone, true);
 });
