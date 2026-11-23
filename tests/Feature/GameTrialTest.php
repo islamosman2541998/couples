@@ -46,22 +46,22 @@ class GameTrialTest extends TestCase
     }
 
     #[DataProvider('listTypes')]
-    public function test_guest_gets_the_first_five_items_of_a_list_game(string $type): void
+    public function test_guest_gets_the_first_three_items_of_a_list_game(string $type): void
     {
         $texts = $this->seedListItems($type);
         $game = $this->paidGame($type);
 
         $first = $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
-        foreach (array_slice($texts, 0, 5) as $text) {
+        foreach (array_slice($texts, 0, 3) as $text) {
             $first->assertSee($text);
         }
-        foreach (array_slice($texts, 5) as $text) {
+        foreach (array_slice($texts, 3) as $text) {
             $first->assertDontSee($text);
         }
 
         $again = $this->get('/games/'.$game->slug.'/play')->assertOk();
         $this->assertSame($this->itemOrder($first->getContent(), $type), $this->itemOrder($again->getContent(), $type));
-        $this->assertSame(array_slice($texts, 0, 5), $this->itemOrder($first->getContent(), $type));
+        $this->assertSame(array_slice($texts, 0, 3), $this->itemOrder($first->getContent(), $type));
     }
 
     #[DataProvider('listTypes')]
@@ -82,16 +82,16 @@ class GameTrialTest extends TestCase
         $texts = $this->seedListItems('who');
         $game = $this->paidGame('who');
 
-        Setting::set('trial_items', '3');
+        Setting::set('trial_items', '4');
         $response = $this->get('/games/'.$game->slug.'/play')->assertOk();
-        $response->assertSee($texts[2])->assertDontSee($texts[3]);
+        $response->assertSee($texts[3])->assertDontSee($texts[4]);
 
         Setting::set('trial_items', '0');
         $this->assertSame(1, \App\Support\GameTrial::size());
         Setting::set('trial_items', '500');
         $this->assertSame(20, \App\Support\GameTrial::size());
         Setting::set('trial_items', 'abc');
-        $this->assertSame(5, \App\Support\GameTrial::size());
+        $this->assertSame(3, \App\Support\GameTrial::size());
     }
 
     public function test_trial_paywall_links_to_the_game_subscription(): void
@@ -119,14 +119,14 @@ class GameTrialTest extends TestCase
         return $texts;
     }
 
-    public function test_card_api_gives_guests_the_same_first_five_cards_of_the_first_level(): void
+    public function test_card_api_gives_guests_the_same_first_three_cards_of_the_first_level(): void
     {
         $texts = $this->seedCardLevels();
         $game = $this->paidGame('card');
 
         foreach (['all', 'male'] as $target) {
             $cards = $this->getJson('/api/cards/easy?game_id='.$game->id.'&target='.$target)->assertOk()->json();
-            $this->assertSame(array_slice($texts, 0, 5), array_column($cards, 'content'));
+            $this->assertSame(array_slice($texts, 0, 3), array_column($cards, 'content'));
         }
         $this->getJson('/api/cards/hard?game_id='.$game->id)->assertForbidden();
     }
@@ -164,20 +164,20 @@ class GameTrialTest extends TestCase
         return $texts;
     }
 
-    public function test_scratch_trial_sends_five_cards_and_blocks_the_rest(): void
+    public function test_scratch_trial_sends_three_cards_and_blocks_the_rest(): void
     {
         $texts = $this->seedScratch();
         $game = $this->paidGame('scratch');
 
         $page = $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
-        $this->assertSame(5, substr_count($page->getContent(), 'class="scratch-silver"'));
-        $page->assertSee($texts[5])->assertDontSee($texts[6]);
+        $this->assertSame(3, substr_count($page->getContent(), 'class="scratch-silver"'));
+        $page->assertSee($texts[3])->assertDontSee($texts[4]);
 
-        $this->getJson('/games/'.$game->slug.'/scratch-cards/5')->assertOk()->assertJson(['content' => $texts[5]]);
-        $this->getJson('/games/'.$game->slug.'/scratch-cards/6')->assertForbidden();
+        $this->getJson('/games/'.$game->slug.'/scratch-cards/3')->assertOk()->assertJson(['content' => $texts[3]]);
+        $this->getJson('/games/'.$game->slug.'/scratch-cards/4')->assertForbidden();
     }
 
-    public function test_spinner_trial_has_a_fixed_result_sequence_of_the_first_five_items(): void
+    public function test_spinner_trial_has_a_fixed_result_sequence_of_the_first_three_items(): void
     {
         $ids = [];
         foreach (range(1, 8) as $i) {
@@ -188,7 +188,7 @@ class GameTrialTest extends TestCase
         $content = $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية')->getContent();
         $this->assertMatchesRegularExpression('/globalThis.spinnerTrialSequence = (\[[^\]]*\]);/', $content);
         preg_match('/globalThis.spinnerTrialSequence = (\[[^\]]*\]);/', $content, $match);
-        $this->assertSame(array_slice(array_reverse($ids), 0, 5), json_decode($match[1], true));
+        $this->assertSame(array_slice(array_reverse($ids), 0, 3), json_decode($match[1], true));
 
         $this->signInMember();
         $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('globalThis.spinnerTrialSequence = null;', false);
@@ -197,7 +197,7 @@ class GameTrialTest extends TestCase
     public function test_snakes_trial_destinations_follow_the_fixed_dice(): void
     {
         $this->assertSame([22, 6, 6, 30, 10], \App\Support\GameTrial::snakesDestinations([3, 6, 5, 2, 4], config('snakes.links')));
-        $this->assertSame([3, 6, 5, 2, 4], \App\Support\GameTrial::snakesDice());
+        $this->assertSame([3, 6, 5], \App\Support\GameTrial::snakesDice());
     }
 
     public function test_snakes_trial_page_only_reveals_reachable_squares(): void
@@ -208,11 +208,11 @@ class GameTrialTest extends TestCase
         $game = $this->paidGame('snakes');
 
         $page = $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('تجربة مجانية');
-        foreach ([6, 10, 22, 30] as $n) {
+        foreach ([6, 22] as $n) {
             $page->assertSee(sprintf('SNAKE-CONTENT-%03d', $n));
         }
-        $page->assertDontSee('SNAKE-CONTENT-005')->assertDontSee('SNAKE-CONTENT-050');
-        $page->assertSee('"trialDice":[3,6,5,2,4]', false);
+        $page->assertDontSee('SNAKE-CONTENT-010')->assertDontSee('SNAKE-CONTENT-030')->assertDontSee('SNAKE-CONTENT-005')->assertDontSee('SNAKE-CONTENT-050');
+        $page->assertSee('"trialDice":[3,6,5]', false);
 
         $this->signInMember();
         $this->get('/games/'.$game->slug.'/play')->assertOk()->assertSee('SNAKE-CONTENT-050')->assertDontSee('"trialDice"', false);
@@ -274,10 +274,10 @@ class GameTrialTest extends TestCase
         $ids = $this->seedMediaItems($type);
         $url = fn (int $id) => route('games.media', ['type' => $type, 'id' => $id]);
 
-        foreach (array_slice($ids, 0, 5) as $id) {
+        foreach (array_slice($ids, 0, 3) as $id) {
             $this->get($url($id))->assertOk();
         }
-        foreach (array_slice($ids, 5) as $id) {
+        foreach (array_slice($ids, 3) as $id) {
             $this->get($url($id))->assertForbidden();
         }
 
@@ -286,6 +286,70 @@ class GameTrialTest extends TestCase
 
         $game->update(['is_active' => false]);
         $this->get($url($ids[0]))->assertForbidden();
+    }
+
+    public function test_locked_game_sends_guests_to_subscribe_and_blocks_content(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('premium');
+        $control = $this->paidGame('control', ['trial_enabled' => false]);
+        $controlIds = $this->seedMediaItems('control');
+        $this->seedCardLevels();
+        $card = $this->paidGame('card', ['trial_enabled' => false]);
+        $this->seedScratch();
+        $scratch = $this->paidGame('scratch', ['trial_enabled' => false]);
+
+        $this->get('/games/'.$control->slug.'/play')->assertRedirect(route('subscribe.create', $control->id));
+        $this->get(route('games.media', ['type' => 'control', 'id' => $controlIds[0]]))->assertForbidden();
+        $this->getJson('/api/cards/easy?game_id='.$card->id)->assertForbidden();
+        $this->getJson('/games/'.$scratch->slug.'/scratch-cards/1')->assertForbidden();
+
+        $this->actingAs(\App\Models\User::factory()->create());
+        $this->get('/games/'.$control->slug.'/play')->assertRedirect(route('subscribe.create', $control->id));
+
+        $this->signInMember();
+        $this->get('/games/'.$control->slug.'/play')->assertOk()->assertDontSee('تجربة مجانية');
+        $this->get(route('games.media', ['type' => 'control', 'id' => $controlIds[6]]))->assertOk();
+    }
+
+    public function test_media_follows_the_game_of_that_type_that_keeps_its_trial(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('premium');
+        $this->paidGame('control', ['trial_enabled' => false]);
+        $ids = $this->seedMediaItems('control');
+        $this->get(route('games.media', ['type' => 'control', 'id' => $ids[0]]))->assertForbidden();
+
+        $this->paidGame('control', ['slug' => 'g-control-2']);
+        $this->get(route('games.media', ['type' => 'control', 'id' => $ids[0]]))->assertOk();
+    }
+
+    public function test_admin_can_turn_a_game_trial_off_and_on(): void
+    {
+        $game = $this->paidGame('who');
+        $this->actingAs(\App\Models\User::factory()->create(['is_admin' => true]));
+        $data = ['name' => 'Trial game', 'type' => 'who', 'price' => 200, 'is_active' => 1, 'sort_order' => 0];
+
+        $this->get('/admin/games/'.$game->id.'/edit')->assertOk()->assertSee('name="trial_enabled"', false)->assertSee('متاحة كتجربة مجانية');
+        $this->put('/admin/games/'.$game->id, $data)->assertRedirect();
+        $this->assertFalse($game->fresh()->trial_enabled);
+        $this->get('/admin/games')->assertOk()->assertSee('مقفولة');
+
+        $this->put('/admin/games/'.$game->id, [...$data, 'trial_enabled' => 1])->assertRedirect();
+        $this->assertTrue($game->fresh()->trial_enabled);
+        $this->get('/admin/games')->assertOk()->assertSee('تجربة')->assertDontSee('مقفولة');
+
+        $this->get('/admin/games/create')->assertOk()->assertSee('name="trial_enabled"', false);
+        $this->post('/admin/games', [...$data, 'name' => 'New locked game'])->assertRedirect();
+        $this->assertFalse(Game::where('name', 'New locked game')->first()->trial_enabled);
+    }
+
+    public function test_locked_game_page_offers_subscription_only(): void
+    {
+        $game = $this->paidGame('who', ['trial_enabled' => false]);
+
+        $this->get('/games/'.$game->slug)->assertOk()
+            ->assertDontSee('جرّب مجاناً')->assertDontSee('جرّبها مجانًا')
+            ->assertSee('بالاشتراك')
+            ->assertSee(route('subscribe.create', $game->id), false);
     }
 
     private function itemOrder(string $html, string $type): array

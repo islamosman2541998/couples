@@ -50,6 +50,7 @@
                                class="w-4 h-4 rounded accent-purple-600">
                         <span class="text-sm font-medium text-gray-300">ضمن باقة كل الألعاب فقط</span>
                     </label>
+                    @include('admin.games.partials.trial-toggle', ['checked' => old('_token') ? old('trial_enabled') : $game->trial_enabled])
                     <div x-show="!isFree">
                         <label class="block text-sm font-medium text-gray-300 mb-2">السعر</label>
                         <input type="number" name="price" value="{{ old('price', $game->price) }}" step="0.01"

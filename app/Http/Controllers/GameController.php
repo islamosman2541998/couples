@@ -27,6 +27,7 @@ class GameController extends Controller
     {
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
         abort_unless($game->type === 'scratch', 404);
+        abort_if(GameTrial::locked($game, auth()->user()), 403);
 
         if (GameTrial::applies($game, auth()->user())) {
             abort_unless($this->trialScratchCards()->pluck('number')->contains($number), 403);
@@ -42,6 +43,11 @@ class GameController extends Controller
     public function play(string $slug)
     {
         $game = Game::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        if (GameTrial::locked($game, auth()->user())) {
+            return redirect()->route('subscribe.create', $game->id)
+                ->with('warning', 'اللعبة دي متاحة بالاشتراك بس');
+        }
 
         $isTrial = GameTrial::applies($game, auth()->user());
         $trialSize = GameTrial::size();

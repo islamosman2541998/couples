@@ -19,6 +19,8 @@ class CardApiController extends Controller
         $game = Game::active()->where('type', 'card')->findOrFail($request->integer('game_id'));
         $level = CardLevel::where('slug', $levelSlug)->firstOrFail();
 
+        abort_if(GameTrial::locked($game, $request->user()), 403);
+
         if (GameTrial::applies($game, $request->user())) {
             abort_unless($level->slug === GameTrial::cardLevelSlug(), 403);
 

@@ -53,6 +53,7 @@
                                x-model="isFree">
                         <span class="text-sm font-medium text-gray-300">ضمن باقة كل الألعاب فقط</span>
                     </label>
+                    @include('admin.games.partials.trial-toggle', ['checked' => old('_token') ? old('trial_enabled') : true])
                 </div>
 
                 <div>

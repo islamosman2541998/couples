@@ -59,6 +59,7 @@
                                 @else
                                     <span class="text-yellow-400">{{ number_format($game->price, 0) }} </span>
                                 @endif
+                                <span class="block mt-1 text-xs {{ $game->trial_enabled ? 'text-sky-400' : 'text-gray-400' }}">{{ $game->trial_enabled ? 'تجربة مجانية' : 'مقفولة' }}</span>
                             </td>
                             <td class="p-4">
                                 <form method="POST" action="{{ route('admin.games.toggle', $game) }}">

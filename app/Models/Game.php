@@ -11,13 +11,16 @@ class Game extends Model
 
     protected $fillable = [
         'name', 'slug', 'description', 'how_to_play', 'image',
-        'type', 'is_free', 'price', 'is_active', 'sort_order',
+        'type', 'is_free', 'trial_enabled', 'price', 'is_active', 'sort_order',
     ];
+
+    protected $attributes = ['trial_enabled' => true];
 
     protected function casts(): array
     {
         return [
             'is_free' => 'boolean',
+            'trial_enabled' => 'boolean',
             'is_active' => 'boolean',
             'price' => 'decimal:2',
         ];

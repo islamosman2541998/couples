@@ -42,6 +42,7 @@ class GameManageController extends Controller
             'how_to_play' => 'nullable|string|max:4000',
             'type' => 'required|in:card,spinner,scratch,who,challenge,know_me,control,snakes',
             'is_free' => 'boolean',
+            'trial_enabled' => 'boolean',
             'price' => 'required|numeric|min:0|max:999999.99',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
@@ -50,6 +51,7 @@ class GameManageController extends Controller
 
         $validated['slug'] = $this->uniqueSlug($validated['name']);
         $validated['is_free'] = $request->boolean('is_free');
+        $validated['trial_enabled'] = $request->boolean('trial_enabled');
         $validated['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
@@ -74,6 +76,7 @@ class GameManageController extends Controller
             'how_to_play' => 'nullable|string|max:4000',
             'type' => 'required|in:card,spinner,scratch,who,challenge,know_me,control,snakes',
             'is_free' => 'boolean',
+            'trial_enabled' => 'boolean',
             'price' => 'required|numeric|min:0|max:999999.99',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
@@ -81,6 +84,7 @@ class GameManageController extends Controller
         ]);
 
         $validated['is_free'] = $request->boolean('is_free');
+        $validated['trial_enabled'] = $request->boolean('trial_enabled');
         $validated['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {

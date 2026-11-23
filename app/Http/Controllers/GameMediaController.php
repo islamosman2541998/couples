@@ -24,8 +24,10 @@ class GameMediaController extends Controller
             $games = Game::active()->where('type', $type)->get();
             abort_unless($item->is_active && $games->isNotEmpty(), 403);
             $subscribed = $user && $games->contains(fn ($game) => $user->hasActiveSubscription($game->id));
-            // Free-trial visitors may load images of the trial slice only.
-            abort_unless($subscribed || in_array($item->id, GameTrial::mediaIds($type), true), 403);
+            // Free-trial visitors may load images of the trial slice only, and only
+            // while a game of this type still offers the trial.
+            $trialOpen = $games->contains(fn ($game) => $game->trial_enabled);
+            abort_unless($subscribed || ($trialOpen && in_array($item->id, GameTrial::mediaIds($type), true)), 403);
         }
         abort_unless($item->image && Storage::disk('premium')->exists($item->image), 404);
         return Storage::disk('premium')->response($item->image, null, ['Cache-Control' => 'private, no-store']);

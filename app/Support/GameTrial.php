@@ -12,7 +12,7 @@ use App\Models\User;
  */
 class GameTrial
 {
-    public const DEFAULT_SIZE = 5;
+    public const DEFAULT_SIZE = 3;
 
     /** Fixed snakes dice; the first {@see size()} values are used. */
     public const SNAKES_DICE = [3, 6, 5, 2, 4, 1, 5, 3, 6, 2, 4, 1, 3, 5, 2, 6, 4, 1, 2, 5];
@@ -31,6 +31,12 @@ class GameTrial
     public static function applies(Game $game, ?User $user): bool
     {
         return ! ($user?->hasActiveSubscription($game->id) ?? false);
+    }
+
+    /** The game is subscription-only and this visitor has no subscription. */
+    public static function locked(Game $game, ?User $user): bool
+    {
+        return ! $game->trial_enabled && self::applies($game, $user);
     }
 
     public static function meta(Game $game, int $shown, ?int $total = null): array
